@@ -1,0 +1,5 @@
+====================
+kitconcept.contentcreator
+====================
+
+User documentation

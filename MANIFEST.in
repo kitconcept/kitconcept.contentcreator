@@ -1,0 +1,4 @@
+graft src/kitconcept/contentcreator
+graft docs
+include *.rst
+global-exclude *.pyc
