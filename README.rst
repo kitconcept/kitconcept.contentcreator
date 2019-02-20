@@ -14,6 +14,8 @@ kitconcept.contentcreator
 .. image:: https://secure.travis-ci.org/collective/kitconcept.contentcreator.png
     :target: http://travis-ci.org/collective/kitconcept.contentcreator
 
+This package is the responsible for automated content creation.
+
 Development
 -----------
 
