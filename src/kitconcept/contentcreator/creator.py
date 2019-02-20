@@ -51,13 +51,17 @@ def add_criterion(topic, index, criterion, value=None):
     name = '{0}_{1}'.format(index, criterion)
     topic.addCriterion(index, criterion)
     crit = topic.getCriterion(name)
-    if criterion == 'ATDateRangeCriterion':
-        crit.setStart(u'2019/02/20 13:55:00 GMT-3')
-        crit.setEnd(u'2019/02/22 13:55:00 GMT-3')
-    elif criterion == 'ATSortCriterion':
-        crit.setReversed(True)
-    elif criterion == 'ATBooleanCriterion':
-        crit.setBool(True)
+
+    # TODO: Add extra parameter to the criterion creation for these criterion types
+    #
+    # if criterion == 'ATDateRangeCriterion':
+    #     crit.setStart(u'2019/02/20 13:55:00 GMT-3')
+    #     crit.setEnd(u'2019/02/22 13:55:00 GMT-3')
+    # elif criterion == 'ATSortCriterion':
+    #     crit.setReversed(True)
+    # elif criterion == 'ATBooleanCriterion':
+    #     crit.setBool(True)
+
     if value is not None:
         crit.setValue(value)
 
