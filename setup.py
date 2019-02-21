@@ -39,10 +39,11 @@ setup(
     zip_safe=False,
     install_requires=[
         'plone.api',
+        'plone.portlets',
+        'plone.restapi',
         'Products.GenericSetup>=1.8.2',
         'setuptools',
         'z3c.jbot',
-        # 'plone.restapi',
         # 'Products.PloneFormGen',
         # 'plone.formwidget.captcha',
     ],
