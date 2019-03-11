@@ -4,9 +4,6 @@ from Acquisition.interfaces import IAcquirer
 from plone import api
 from plone.app.dexterity import behaviors
 from plone.portlets.interfaces import IPortletAssignmentSettings
-from plone.restapi.interfaces import IDeserializeFromJson
-from plone.restapi.services.content.utils import add
-from plone.restapi.services.content.utils import create
 from Products.Archetypes.interfaces import IBaseObject
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
@@ -28,7 +25,7 @@ try:
     from plone.restapi.services.content.utils import add
     from plone.restapi.services.content.utils import create
     PRESTAPI_PRESENT = True
-except pkg_resources.DistributionNotFound:  # pragma: no cover
+except pkg_resources.DistributionNotFound:  # pragma: no restapi
     PRESTAPI_PRESENT = False
 
 
