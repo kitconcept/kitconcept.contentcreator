@@ -18,7 +18,18 @@ from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
+import pkg_resources
 import os
+
+
+try:
+    pkg_resources.get_distribution('plone.restapi')
+    from plone.restapi.interfaces import IDeserializeFromJson
+    from plone.restapi.services.content.utils import add
+    from plone.restapi.services.content.utils import create
+    PRESTAPI_PRESENT = True
+except pkg_resources.DistributionNotFound:  # pragma: no cover
+    PRESTAPI_PRESENT = False
 
 
 logger = logging.getLogger('collective.contentcreator')
@@ -53,14 +64,13 @@ def add_criterion(topic, index, criterion, value=None):
     crit = topic.getCriterion(name)
 
     # TODO: Add extra parameter to the criterion creation for these criterion types
-    #
-    # if criterion == 'ATDateRangeCriterion':
-    #     crit.setStart(u'2019/02/20 13:55:00 GMT-3')
-    #     crit.setEnd(u'2019/02/22 13:55:00 GMT-3')
-    # elif criterion == 'ATSortCriterion':
-    #     crit.setReversed(True)
-    # elif criterion == 'ATBooleanCriterion':
-    #     crit.setBool(True)
+    if criterion == 'ATDateRangeCriterion':
+        crit.setStart(u'2019/02/20 13:55:00 GMT-3')
+        crit.setEnd(u'2019/02/22 13:55:00 GMT-3')
+    elif criterion == 'ATSortCriterion':
+        crit.setReversed(True)
+    elif criterion == 'ATBooleanCriterion':
+        crit.setBool(True)
 
     if value is not None:
         crit.setValue(value)
