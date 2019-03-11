@@ -36,7 +36,6 @@ class ContentcreatorCoreLayer(PloneSandboxLayer):
             container=portal
         )
         logout()
-        applyProfile(portal, 'kitconcept.contentcreator:default')
 
 
 CONTENTCREATOR_CORE_FIXTURE = ContentcreatorCoreLayer()
