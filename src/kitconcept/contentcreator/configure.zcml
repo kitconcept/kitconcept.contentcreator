@@ -6,34 +6,6 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="kitconcept.contentcreator">
 
-  <i18n:registerTranslations directory="locales" />
-
   <includeDependencies package="." />
-
-  <include package=".browser" />
-
-  <include file="upgrades.zcml" />
-
-  <genericsetup:registerProfile
-      name="default"
-      title="kitconcept.contentcreator site (kitconcept.contentcreator)"
-      directory="profiles/default"
-      description="Installs the kitconcept.contentcreator add-on."
-      provides="Products.GenericSetup.interfaces.EXTENSION"
-      post_handler=".setuphandlers.post_install"
-      />
-
-  <genericsetup:registerProfile
-      name="uninstall"
-      title="kitconcept.contentcreator site (kitconcept.contentcreator): uninstall"
-      directory="profiles/uninstall"
-      description="Uninstalls the kitconcept.contentcreator add-on."
-      provides="Products.GenericSetup.interfaces.EXTENSION"
-      post_handler=".setuphandlers.uninstall"
-      />
-
-  <utility
-      factory=".setuphandlers.HiddenProfiles"
-      name="kitconcept.contentcreator-hiddenprofiles" />
 
 </configure>
