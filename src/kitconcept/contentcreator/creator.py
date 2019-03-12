@@ -152,7 +152,6 @@ def recursively_create_item_runner(
     request = getRequest()
 
     for data in content_structure:
-
         type_ = data.get('@type', None)
         id_ = data.get('id', None)
         title = data.get('title', None)
@@ -164,6 +163,14 @@ def recursively_create_item_runner(
             field = data.get('field', None)
             value = data.get('value', None)
             add_criterion(container, field, type_, value)
+            continue
+
+        # PFG
+        if type_ == 'FormSelectionField' and data.get('fgVocabulary'):
+            container.fgVocabulary = data.get('fgVocabulary')
+            continue
+        if type_ == 'FormMultiSelectionField' and data.get('fgVocabulary'): # noqa
+            container.fgVocabulary = data.get('fgVocabulary')
             continue
 
         obj = create(container, type_, id_=id_, title=title)
@@ -179,7 +186,7 @@ def recursively_create_item_runner(
 
         if deserializer is None:
             raise BadRequest(
-                'Canno deserialize type {}'.format(obj.portal_type))
+                'Cannot deserialize type {}'.format(obj.portal_type))
 
         # defaults
         if not data.get('language'):
