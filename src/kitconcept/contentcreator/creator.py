@@ -305,5 +305,5 @@ def create_item_runner(
         logger,
     )
 
-    for name, provider in getAdapters((container, ), ICreateTestContent):
+    for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):
         provider.create_test_content()
