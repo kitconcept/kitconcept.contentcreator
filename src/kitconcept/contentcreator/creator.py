@@ -166,11 +166,8 @@ def recursively_create_item_runner(
             continue
 
         # PFG
-        if type_ == 'FormSelectionField' and data.get('fgVocabulary'):
-            container.fgVocabulary = data.get('fgVocabulary')
-            continue
-        if type_ == 'FormMultiSelectionField' and data.get('fgVocabulary'): # noqa
-            container.fgVocabulary = data.get('fgVocabulary')
+        if type_ in ['FormSelectionField', 'FormMultiSelectionField']:
+            container.fgVocabulary = data.get('fgVocabulary', [])
             continue
 
         obj = create(container, type_, id_=id_, title=title)
