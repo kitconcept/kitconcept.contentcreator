@@ -170,82 +170,87 @@ def recursively_create_item_runner(
             container.fgVocabulary = data.get('fgVocabulary', [])
             continue
 
+        # if id_ ==
+        # import debug
         try:
             obj = create(container, type_, id_=id_, title=title)
+
+            # Acquisition wrap temporarily to satisfy things like vocabularies
+            # depending on tools
+            temporarily_wrapped = False
+            if IAcquirer.providedBy(obj) and not safe_hasattr(obj, 'aq_base'):
+                obj = obj.__of__(container)
+                temporarily_wrapped = True
+
+            deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
+
+            if deserializer is None:
+                logger.warn('Cannot deserialize type {}'.format(obj.portal_type))
+                continue
+
+            # defaults
+            if not data.get('language'):
+                data['language'] = default_lang
+
+            if not data.get('review_state'):
+                data['review_state'] = default_wf_state
+
+            deserializer(validate_all=True, data=data, create=True)
+
+            if temporarily_wrapped:
+                obj = aq_base(obj)
+
+            if not getattr(deserializer, 'notifies_create', False):
+                notify(ObjectCreatedEvent(obj))
+
+            obj = add(container, obj, rename=not bool(id_))
+
+            # Set UUID - TODO: add to p.restapi
+            if data.get('UID', False) and IBaseObject.providedBy(obj):
+                obj._setUID(data.get('UID'))
+                obj.reindexObject(idxs=['UID'])
+            else:
+                setattr(obj, '_plone.uuid', data.get('UID'))
+                obj.reindexObject(idxs=['UID'])
+
+            # Set workflow
+            if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
+                api.content.transition(obj=obj, to_state=data.get('review_state'))
+
+            # set default
+            opts = data.get('opts', {})
+            if opts.get('default_page', False):
+                container.setDefaultPage(obj.id)
+
+            # CONSTRAIN TYPES
+            locally_allowed_types = opts.get('locally_allowed_types', False)
+            immediately_allowed_types = opts.get('immediately_allowed_types', False) # noqa
+            if locally_allowed_types or immediately_allowed_types:
+                be = ISelectableConstrainTypes(obj, None)
+                if be:
+                    be.setConstrainTypesMode(behaviors.constrains.ENABLED)
+                    if locally_allowed_types:
+                        be.setLocallyAllowedTypes = locally_allowed_types
+                        logger.debug('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
+                    if immediately_allowed_types:
+                        be.setImmediatelyAddableTypes = immediately_allowed_types
+                        logger.debug('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
+
+            id_ = obj.id  # get the real id
+            path = '/'.join(obj.getPhysicalPath())
+            logger.info('{0}: created'.format(path))
+
+            create_portlets(obj, data.get('portlets', []))
+
+            # create local roles
+            for user, roles in data.get('local_roles', {}).items():
+                obj.manage_setLocalRoles(user, roles)
         except Exception as e:
-            logger.warn('Could not create "{0}" type: {1}'.format(type_, e.message))
+            container_path = '/'.join(container.getPhysicalPath())
+            message = (
+                'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}')
+            logger.warn(message.format(type_, container_path, id_, e.message))
             continue
-
-        # Acquisition wrap temporarily to satisfy things like vocabularies
-        # depending on tools
-        temporarily_wrapped = False
-        if IAcquirer.providedBy(obj) and not safe_hasattr(obj, 'aq_base'):
-            obj = obj.__of__(container)
-            temporarily_wrapped = True
-
-        deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
-
-        if deserializer is None:
-            logger.warn('Cannot deserialize type {}'.format(obj.portal_type))
-            continue
-
-        # defaults
-        if not data.get('language'):
-            data['language'] = default_lang
-
-        if not data.get('review_state'):
-            data['review_state'] = default_wf_state
-
-        deserializer(validate_all=True, data=data, create=True)
-
-        if temporarily_wrapped:
-            obj = aq_base(obj)
-
-        if not getattr(deserializer, 'notifies_create', False):
-            notify(ObjectCreatedEvent(obj))
-
-        obj = add(container, obj, rename=not bool(id_))
-
-        # Set UUID - TODO: add to p.restapi
-        if data.get('UID', False) and IBaseObject.providedBy(obj):
-            obj._setUID(data.get('UID'))
-            obj.reindexObject(idxs=['UID'])
-        else:
-            setattr(obj, '_plone.uuid', data.get('UID'))
-            obj.reindexObject(idxs=['UID'])
-
-        # Set workflow
-        if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
-            api.content.transition(obj=obj, to_state=data.get('review_state'))
-
-        # set default
-        opts = data.get('opts', {})
-        if opts.get('default_page', False):
-            container.setDefaultPage(obj.id)
-
-        # CONSTRAIN TYPES
-        locally_allowed_types = opts.get('locally_allowed_types', False)
-        immediately_allowed_types = opts.get('immediately_allowed_types', False) # noqa
-        if locally_allowed_types or immediately_allowed_types:
-            be = ISelectableConstrainTypes(obj, None)
-            if be:
-                be.setConstrainTypesMode(behaviors.constrains.ENABLED)
-                if locally_allowed_types:
-                    be.setLocallyAllowedTypes = locally_allowed_types
-                    logger.debug('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
-                if immediately_allowed_types:
-                    be.setImmediatelyAddableTypes = immediately_allowed_types
-                    logger.debug('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
-
-        id_ = obj.id  # get the real id
-        path = '/'.join(obj.getPhysicalPath())
-        logger.info('{0}: created'.format(path))
-
-        create_portlets(obj, data.get('portlets', []))
-
-        # create local roles
-        for user, roles in data.get('local_roles', {}).items():
-            obj.manage_setLocalRoles(user, roles)
 
         # Call recursively
         recursively_create_item_runner(
