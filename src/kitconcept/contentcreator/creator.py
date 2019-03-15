@@ -190,7 +190,7 @@ def recursively_create_item_runner(
             if not data.get('language'):
                 data['language'] = default_lang
 
-            if not data.get('review_state'):
+            if not data.get('review_state') and obj.portal_type not in ignore_wf_types:
                 data['review_state'] = default_wf_state
 
             deserializer(validate_all=True, data=data, create=True)
@@ -256,6 +256,7 @@ def recursively_create_item_runner(
             content_structure=data.get('items', []),
             default_lang=default_lang,
             default_wf_state=default_wf_state,
+            ignore_wf_types=ignore_wf_types,
             logger=logger,
         )
 
