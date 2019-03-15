@@ -102,7 +102,7 @@ def create_portlets(obj, portlets):
             settings['visible'] = data['visible']
 
 
-def recursively_create_item_runner(
+def create_item_runner(
         container,
         content_structure,
         auto_id=False,
@@ -251,7 +251,7 @@ def recursively_create_item_runner(
             continue
 
         # Call recursively
-        recursively_create_item_runner(
+        create_item_runner(
             obj,
             content_structure=data.get('items', []),
             default_lang=default_lang,
@@ -259,63 +259,3 @@ def recursively_create_item_runner(
             ignore_wf_types=ignore_wf_types,
             logger=logger,
         )
-
-
-def create_item_runner(
-        container,
-        content_structure,
-        auto_id=False,
-        default_lang=None,
-        default_wf_state=None,
-        ignore_wf_types=['Image', 'File'],
-        logger=logger):
-    """Create Dexterity contents from plone.restapi compatible structures.
-
-    :param container: The context in which the item should be created.
-    :type container: Plone content object
-    :param content_structure: Python dictionary with content structure.
-    :type content_structure: dict
-    :param default_lang: Default language.
-    :type default_lang: string
-    :param default_wf_state: Default workflow state.
-    :type default_wf_state: string
-    :param ignore_wf_types: Ignore to apply the workflow transition if item is
-                            one of these types.
-    :type ignore_wf_types: list (default: ['Image', 'File'])
-    :param logger: Logger to use.
-    :type logger: Python logging instance.
-
-    The datastructure of content defined by plone.restapi:
-
-    https://plonerestapi.readthedocs.io/en/latest/content.html#creating-a-resource-with-post
-
-    [
-        {
-            "type": "",
-            "id": "",
-            "title": "",
-            "description": "",
-            "items": [],
-            "opts": {
-                "default_page": "",
-                "locally_allowed_types": [],
-                "immediately_allowed_types": [],
-            }
-        }
-    ]
-
-    Use the same structure for each child. Leave out, what you don't need.
-    """
-
-    recursively_create_item_runner(
-        container,
-        content_structure,
-        auto_id,
-        default_lang,
-        default_wf_state,
-        ignore_wf_types,
-        logger,
-    )
-
-    for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):
-        provider.create_test_content()
