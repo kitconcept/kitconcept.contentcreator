@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
-from kitconcept.contentcreator.interfaces import ICreateTestContent
 from plone import api
 from plone.app.dexterity import behaviors
 from plone.portlets.interfaces import IPortletAssignmentSettings
 from Products.Archetypes.interfaces import IBaseObject
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
-from zope.component import getAdapters
 from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
@@ -16,8 +14,8 @@ from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
-import os
 import pkg_resources
+import os
 
 
 try:
