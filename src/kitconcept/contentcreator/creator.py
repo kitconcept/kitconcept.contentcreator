@@ -8,7 +8,6 @@ from plone.portlets.interfaces import IPortletAssignmentSettings
 from Products.Archetypes.interfaces import IBaseObject
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
-from zExceptions import BadRequest
 from zope.component import getAdapters
 from zope.component import queryMultiAdapter
 from zope.event import notify
@@ -157,7 +156,8 @@ def recursively_create_item_runner(
         title = data.get('title', None)
 
         if not type_:
-            raise BadRequest("Property '@type' is required")
+            logger.warn("Property '@type' is required")
+            continue
 
         if container.portal_type == 'Topic':
             field = data.get('field', None)
@@ -186,8 +186,8 @@ def recursively_create_item_runner(
         deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
 
         if deserializer is None:
-            raise BadRequest(
-                'Cannot deserialize type {}'.format(obj.portal_type))
+            logger.warn('Cannot deserialize type {}'.format(obj.portal_type))
+            continue
 
         # defaults
         if not data.get('language'):
