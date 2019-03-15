@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from kitconcept.contentcreator.creator import create_item_runner
 from kitconcept.contentcreator.interfaces import ICreateTestContent
 from kitconcept.contentcreator.testing import CONTENTCREATOR_CORE_INTEGRATION_TESTING
 from plone import api
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from zope.component import adapter
+from zope.component import getAdapters
 from zope.component import getGlobalSiteManager
 from zope.interface import implementer
 
@@ -59,9 +59,7 @@ class AdaptersTestCase(unittest.TestCase):
         self.assertNotIn('newsitem', self.portal)
         self.assertNotIn('page', self.portal)
         with api.env.adopt_roles(['Manager']):
-            create_item_runner(
-                container=self.portal,
-                content_structure=[],
-            )
+            for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):        
+                provider.create_test_content()
         self.assertIn('newsitem', self.portal)
         self.assertIn('page', self.portal)
