@@ -172,7 +172,7 @@ def recursively_create_item_runner(
 
         try:
             obj = create(container, type_, id_=id_, title=title)
-        exception Exception as e:
+        except Exception as e:
             logger.warn('Could not create "{0}" type: {1}'.format(type_, e.message))
             continue
 
