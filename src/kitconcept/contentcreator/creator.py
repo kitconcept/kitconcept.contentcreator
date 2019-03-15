@@ -170,8 +170,6 @@ def recursively_create_item_runner(
             container.fgVocabulary = data.get('fgVocabulary', [])
             continue
 
-        # if id_ ==
-        # import debug
         try:
             obj = create(container, type_, id_=id_, title=title)
 
