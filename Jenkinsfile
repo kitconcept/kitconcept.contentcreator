@@ -21,16 +21,16 @@ pipeline {
             sh 'make'
           }
         }
-        stage('Static Code Analysis') {
-          agent {
-            label "node"
-          }
-          steps {
-            deleteDir()
-            checkout scm
-            sh 'make code-analysis'
-          }
-        }
+        // stage('Static Code Analysis') {
+        //   agent {
+        //     label "node"
+        //   }
+        //   steps {
+        //     deleteDir()
+        //     checkout scm
+        //     sh 'make code-analysis'
+        //   }
+        // }
         stage('Unit / Integration Tests') {
           agent {
             label "node"
