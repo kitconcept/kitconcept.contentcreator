@@ -55,7 +55,7 @@ class AdaptersTestCase(unittest.TestCase):
         gsm.registerAdapter(CreateNewsItemContent, name='newsitem')
         gsm.registerAdapter(CreatePageContent, name='page')
 
-    def test_amp_pixel_provider(self):
+    def test_adapter(self):
         self.assertNotIn('newsitem', self.portal)
         self.assertNotIn('page', self.portal)
         with api.env.adopt_roles(['Manager']):
