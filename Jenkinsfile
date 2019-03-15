@@ -41,16 +41,16 @@ pipeline {
             sh 'make test'
           }
         }
-        stage('Robot Framework based acceptance tests') {
-          agent {
-            label "node"
-          }
-          steps {
-            deleteDir()
-            checkout scm
-            sh 'make test-acceptance'
-          }
-        }
+        // stage('Robot Framework based acceptance tests') {
+        //   agent {
+        //     label "node"
+        //   }
+        //   steps {
+        //     deleteDir()
+        //     checkout scm
+        //     sh 'make test-acceptance'
+        //   }
+        // }
       }
     }
   }
