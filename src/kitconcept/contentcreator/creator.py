@@ -170,7 +170,11 @@ def recursively_create_item_runner(
             container.fgVocabulary = data.get('fgVocabulary', [])
             continue
 
-        obj = create(container, type_, id_=id_, title=title)
+        try:
+            obj = create(container, type_, id_=id_, title=title)
+        exception Exception as e:
+            logger.warn('Could not create "{0}" type: {1}'.format(type_, e.message))
+            continue
 
         # Acquisition wrap temporarily to satisfy things like vocabularies
         # depending on tools
