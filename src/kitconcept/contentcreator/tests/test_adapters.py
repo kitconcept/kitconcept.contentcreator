@@ -19,7 +19,7 @@ class CreateNewsItemContent(object):
     def __init__(self, context):
         self.context = context
 
-    def create_test_content(self):
+    def __call__(self):
         api.content.create(
             container=self.context,
             type='News Item',
@@ -36,7 +36,7 @@ class CreatePageContent(object):
     def __init__(self, context):
         self.context = context
 
-    def create_test_content(self):
+    def __call__(self):
         api.content.create(
             container=self.context,
             type='Document',
@@ -60,6 +60,6 @@ class AdaptersTestCase(unittest.TestCase):
         self.assertNotIn('page', self.portal)
         with api.env.adopt_roles(['Manager']):
             for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):        
-                provider.create_test_content()
+                provider()
         self.assertIn('newsitem', self.portal)
         self.assertIn('page', self.portal)

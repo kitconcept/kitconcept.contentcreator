@@ -11,5 +11,5 @@ class IContentcreatorCoreLayer(IDefaultBrowserLayer):
 class ICreateTestContent(Interface):
     """Adapter for test content creation."""
 
-    def create_test_content(self):
+    def __call__(self):
         """Create the test content if available."""
