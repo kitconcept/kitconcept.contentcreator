@@ -38,6 +38,7 @@ pipeline {
           steps {
             deleteDir()
             checkout scm
+            sh 'make'
             sh 'make test'
           }
         }
