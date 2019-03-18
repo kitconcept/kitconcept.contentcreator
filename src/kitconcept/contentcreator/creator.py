@@ -16,7 +16,6 @@ import json
 import logging
 import os
 import pkg_resources
-import random
 
 
 try:
@@ -104,6 +103,7 @@ def create_portlets(obj, portlets):
 def generate_jpeg(width, height):
     from PIL import Image
     from StringIO import StringIO
+    from random import random
     # Mandelbrot fractal
     # FB - 201003254
     # drawing area
@@ -114,7 +114,7 @@ def generate_jpeg(width, height):
     maxIt = 25  # max iterations allowed
     # image size
     image = Image.new('RGB', (width, height))
-    c = complex(random.random() * 2.0 - 1.0, random.random() - 0.5)  # nosec
+    c = complex(random() * 2.0 - 1.0, random() - 0.5)  # nosec
 
     for y in range(height):
         zy = y * (yb - ya) // (height - 1) + ya
@@ -144,6 +144,17 @@ def set_image_field(obj, image):
         # Dexterity
         data = image if type(image) == str else image.getvalue()
         obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
+    finally:
+        obj.reindexObject()
+
+
+def set_exclude_from_nav(obj):
+    """Set object to be excluded from navigation."""
+    try:
+        obj.setExcludeFromNav(True)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        obj.exclude_from_nav = True
     finally:
         obj.reindexObject()
 
@@ -218,6 +229,9 @@ def create_item_runner(
 
         try:
             obj = create(container, type_, id_=id_, title=title)
+
+            if data.get('exclude_from_nav', False):
+                set_exclude_from_nav(obj)
 
             if type_ == 'Image':
                 set_image_field(obj, generate_jpeg(50, 50))
