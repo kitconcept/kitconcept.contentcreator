@@ -100,6 +100,53 @@ def create_portlets(obj, portlets):
             settings['visible'] = data['visible']
 
 
+def generate_jpeg(width, height):
+    from PIL import Image
+    from StringIO import StringIO
+    # Mandelbrot fractal
+    # FB - 201003254
+    # drawing area
+    xa = -2.0
+    xb = 1.0
+    ya = -1.5
+    yb = 1.5
+    maxIt = 25  # max iterations allowed
+    # image size
+    image = Image.new('RGB', (width, height))
+    c = complex(random.random() * 2.0 - 1.0, random.random() - 0.5)  # nosec
+
+    for y in range(height):
+        zy = y * (yb - ya) // (height - 1) + ya
+        for x in range(width):
+            zx = x * (xb - xa) // (width - 1) + xa
+            z = complex(zx, zy)
+            for i in range(maxIt):
+                if abs(z) > 2.0:
+                    break
+                z = z * z + c
+            r = i % 4 * 64
+            g = i % 8 * 32
+            b = i % 16 * 16
+            image.putpixel((x, y), b * 65536 + g * 256 + r)
+
+    output = StringIO()
+    image.save(output, format='PNG')
+    return output
+
+
+def set_image_field(obj, image):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    from plone.namedfile.file import NamedBlobImage
+    try:
+        obj.setImage(image)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        data = image if type(image) == str else image.getvalue()
+        obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
+    finally:
+        obj.reindexObject()
+
+
 def create_item_runner(
         container,
         content_structure,
@@ -208,6 +255,9 @@ def create_item_runner(
             else:
                 setattr(obj, '_plone.uuid', data.get('UID'))
                 obj.reindexObject(idxs=['UID'])
+
+            if type_ == 'Image':
+                set_image_field(obj, generate_jpeg(50, 50))
 
             # Set workflow
             if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
