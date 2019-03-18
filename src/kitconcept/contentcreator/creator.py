@@ -218,6 +218,9 @@ def create_item_runner(
         try:
             obj = create(container, type_, id_=id_, title=title)
 
+            if type_ == 'Image':
+                set_image_field(obj, generate_jpeg(50, 50))
+
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
             temporarily_wrapped = False
@@ -245,9 +248,6 @@ def create_item_runner(
 
             if not getattr(deserializer, 'notifies_create', False):
                 notify(ObjectCreatedEvent(obj))
-
-            if type_ == 'Image':
-                set_image_field(obj, generate_jpeg(50, 50))
 
             obj = add(container, obj, rename=not bool(id_))
 
