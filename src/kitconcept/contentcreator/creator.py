@@ -148,17 +148,6 @@ def set_image_field(obj, image):
         obj.reindexObject()
 
 
-def set_exclude_from_nav(obj):
-    """Set object to be excluded from navigation."""
-    try:
-        obj.setExcludeFromNav(True)  # Archetypes
-    except AttributeError:
-        # Dexterity
-        obj.exclude_from_nav = True
-    finally:
-        obj.reindexObject()
-
-
 def create_item_runner(
         container,
         content_structure,
@@ -193,12 +182,15 @@ def create_item_runner(
             "id": "",
             "title": "",
             "description": "",
-            "items": [],
             "opts": {
                 "default_page": "",
+                "exclude_from_nav": "",
+                "local_roles": {},
+                "locally_allowed_types": [],
                 "locally_allowed_types": [],
                 "immediately_allowed_types": [],
-            }
+            },
+            "items": []
         }
     ]
 
@@ -230,10 +222,8 @@ def create_item_runner(
         try:
             obj = create(container, type_, id_=id_, title=title)
 
-            if data.get('exclude_from_nav', False):
-                set_exclude_from_nav(obj)
-
             if type_ == 'Image':
+                import debug
                 set_image_field(obj, generate_jpeg(50, 50))
 
             # Acquisition wrap temporarily to satisfy things like vocabularies
@@ -282,6 +272,8 @@ def create_item_runner(
             opts = data.get('opts', {})
             if opts.get('default_page', False):
                 container.setDefaultPage(obj.id)
+            if opts.get('exclude_from_nav', False):
+                obj.setExcludeFromNav(True)
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get('locally_allowed_types', False)
@@ -304,7 +296,7 @@ def create_item_runner(
             create_portlets(obj, data.get('portlets', []))
 
             # create local roles
-            for user, roles in data.get('local_roles', {}).items():
+            for user, roles in opts.get('local_roles', {}).items():
                 obj.manage_setLocalRoles(user, roles)
         except Exception as e:
             container_path = '/'.join(container.getPhysicalPath())
