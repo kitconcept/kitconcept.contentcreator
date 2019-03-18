@@ -14,8 +14,9 @@ from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
-import pkg_resources
 import os
+import pkg_resources
+import random
 
 
 try:
