@@ -246,6 +246,9 @@ def create_item_runner(
             if not getattr(deserializer, 'notifies_create', False):
                 notify(ObjectCreatedEvent(obj))
 
+            if type_ == 'Image':
+                set_image_field(obj, generate_jpeg(50, 50))
+
             obj = add(container, obj, rename=not bool(id_))
 
             # Set UUID - TODO: add to p.restapi
@@ -255,9 +258,6 @@ def create_item_runner(
             else:
                 setattr(obj, '_plone.uuid', data.get('UID'))
                 obj.reindexObject(idxs=['UID'])
-
-            if type_ == 'Image':
-                set_image_field(obj, generate_jpeg(50, 50))
 
             # Set workflow
             if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
