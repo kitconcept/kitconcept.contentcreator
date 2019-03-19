@@ -145,7 +145,18 @@ def set_image_field(obj, image):
         data = image if type(image) == str else image.getvalue()
         obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
     finally:
-        obj.reindexObject()
+        obj.reindexObject(idxs=['image'])
+
+
+def set_exclude_from_nav(obj):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    try:
+        obj.setExcludeFromNav(True)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        obj.exclude_from_nav = True
+    finally:
+        obj.reindexObject(idxs=['exclude_from_nav'])
 
 
 def create_item_runner(
@@ -223,8 +234,7 @@ def create_item_runner(
             obj = create(container, type_, id_=id_, title=title)
 
             if type_ == 'Image':
-                import debug
-                set_image_field(obj, generate_jpeg(50, 50))
+                set_image_field(obj, generate_jpeg(768, 768))
 
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -273,7 +283,7 @@ def create_item_runner(
             if opts.get('default_page', False):
                 container.setDefaultPage(obj.id)
             if opts.get('exclude_from_nav', False):
-                obj.setExcludeFromNav(True)
+                set_exclude_from_nav(obj)
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get('locally_allowed_types', False)
@@ -284,10 +294,10 @@ def create_item_runner(
                     be.setConstrainTypesMode(behaviors.constrains.ENABLED)
                     if locally_allowed_types:
                         be.setLocallyAllowedTypes = locally_allowed_types
-                        logger.debug('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
+                        logger.warn('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
                     if immediately_allowed_types:
                         be.setImmediatelyAddableTypes = immediately_allowed_types
-                        logger.debug('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
+                        logger.warn('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
 
             id_ = obj.id  # get the real id
             path = '/'.join(obj.getPhysicalPath())
