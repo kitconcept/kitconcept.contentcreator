@@ -101,8 +101,8 @@ def create_portlets(obj, portlets):
 
 
 def generate_jpeg(width, height):
+    from io import BytesIO
     from PIL import Image
-    from StringIO import StringIO
     from random import random
     # Mandelbrot fractal
     # FB - 201003254
@@ -114,12 +114,12 @@ def generate_jpeg(width, height):
     maxIt = 25  # max iterations allowed
     # image size
     image = Image.new('RGB', (width, height))
-    c = complex(random() * 2.0 - 1.0, random() - 0.5)  # nosec
+    c = complex(random() * 2.0 - 1.0, random() - 0.5)
 
     for y in range(height):
-        zy = y * (yb - ya) // (height - 1) + ya
+        zy = y * (yb - ya) / (height - 1) + ya
         for x in range(width):
-            zx = x * (xb - xa) // (width - 1) + xa
+            zx = x * (xb - xa) / (width - 1) + xa
             z = complex(zx, zy)
             for i in range(maxIt):
                 if abs(z) > 2.0:
@@ -130,9 +130,9 @@ def generate_jpeg(width, height):
             b = i % 16 * 16
             image.putpixel((x, y), b * 65536 + g * 256 + r)
 
-    output = StringIO()
+    output = BytesIO()
     image.save(output, format='PNG')
-    return output
+    return output.getvalue()
 
 
 def set_image_field(obj, image):
@@ -142,6 +142,8 @@ def set_image_field(obj, image):
         obj.setImage(image)  # Archetypes
     except AttributeError:
         # Dexterity
+        if not getattr(obj, 'image', False):
+            return
         data = image if type(image) == str else image.getvalue()
         obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
     finally:
@@ -195,6 +197,7 @@ def create_item_runner(
             "description": "",
             "opts": {
                 "default_page": "",
+                "default_view": "",
                 "exclude_from_nav": "",
                 "local_roles": {},
                 "locally_allowed_types": [],
@@ -233,8 +236,7 @@ def create_item_runner(
         try:
             obj = create(container, type_, id_=id_, title=title)
 
-            if type_ == 'Image':
-                set_image_field(obj, generate_jpeg(768, 768))
+            set_image_field(obj, generate_jpeg(768, 768))
 
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -282,6 +284,9 @@ def create_item_runner(
             opts = data.get('opts', {})
             if opts.get('default_page', False):
                 container.setDefaultPage(obj.id)
+            default_view = opts.get('default_view', False)
+            if default_view:
+                obj.setLayout(default_view)
             if opts.get('exclude_from_nav', False):
                 set_exclude_from_nav(obj)
 
