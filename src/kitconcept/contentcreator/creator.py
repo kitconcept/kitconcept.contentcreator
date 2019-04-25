@@ -95,7 +95,7 @@ def create_portlets(obj, portlets):
                 addview.createAndAdd(data=data['assignment'])
             else:  # Some portlets don't have assignment
                 addview.create()
-            assignment = mapping.values()[-1]
+            assignment = list(mapping.values())[-1]
             settings = IPortletAssignmentSettings(assignment)
             settings['visible'] = data['visible']
 

@@ -5,7 +5,11 @@ Changelog
 1.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Port to Python 3.
+  [sneridagh]
+
+- Documentation.
+  [sneridagh]
 
 
 1.0.0 (2019-03-26)
