@@ -2,7 +2,17 @@ Changelog
 =========
 
 
-1.0.0a1 (unreleased)
+1.0.1 (unreleased)
+------------------
+
+- Port to Python 3.
+  [sneridagh]
+
+- Documentation.
+  [sneridagh]
+
+
+1.0.0 (2019-03-26)
 ------------------
 
 - Initial release.

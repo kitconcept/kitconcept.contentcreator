@@ -95,7 +95,7 @@ def create_portlets(obj, portlets):
                 addview.createAndAdd(data=data['assignment'])
             else:  # Some portlets don't have assignment
                 addview.create()
-            assignment = mapping.values()[-1]
+            assignment = list(mapping.values())[-1]
             settings = IPortletAssignmentSettings(assignment)
             settings['visible'] = data['visible']
 
@@ -245,17 +245,20 @@ def create_item_runner(
                 obj = obj.__of__(container)
                 temporarily_wrapped = True
 
-            deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
+            deserializer = queryMultiAdapter(
+                (obj, request), IDeserializeFromJson)
 
             if deserializer is None:
-                logger.warn('Cannot deserialize type {}'.format(obj.portal_type))
+                logger.warn(
+                    'Cannot deserialize type {}'.format(obj.portal_type))
                 continue
 
             # defaults
             if not data.get('language'):
                 data['language'] = default_lang
 
-            if not data.get('review_state') and obj.portal_type not in ignore_wf_types:
+            if not data.get('review_state') and \
+               obj.portal_type not in ignore_wf_types:
                 data['review_state'] = default_wf_state
 
             deserializer(validate_all=True, data=data, create=True)
@@ -277,8 +280,10 @@ def create_item_runner(
                 obj.reindexObject(idxs=['UID'])
 
             # Set workflow
-            if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
-                api.content.transition(obj=obj, to_state=data.get('review_state'))
+            if data.get('review_state', False) and \
+                obj.portal_type not in ignore_wf_types: # noqa
+                api.content.transition(
+                    obj=obj, to_state=data.get('review_state'))
 
             # set default
             opts = data.get('opts', {})
@@ -301,7 +306,7 @@ def create_item_runner(
                         be.setLocallyAllowedTypes = locally_allowed_types
                         logger.warn('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
                     if immediately_allowed_types:
-                        be.setImmediatelyAddableTypes = immediately_allowed_types
+                        be.setImmediatelyAddableTypes = immediately_allowed_types  # noqa
                         logger.warn('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
 
             id_ = obj.id  # get the real id
@@ -316,7 +321,7 @@ def create_item_runner(
         except Exception as e:
             container_path = '/'.join(container.getPhysicalPath())
             message = (
-                'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}')
+                'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}')  # noqa
             logger.warn(message.format(type_, container_path, id_, e.message))
             continue
 

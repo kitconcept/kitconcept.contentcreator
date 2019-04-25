@@ -21,10 +21,7 @@ class CreateNewsItemContent(object):
 
     def __call__(self):
         api.content.create(
-            container=self.context,
-            type='News Item',
-            title='Lorem Ipsum',
-            id='newsitem',
+            container=self.context, type="News Item", title="Lorem Ipsum", id="newsitem"
         )
 
 
@@ -38,10 +35,7 @@ class CreatePageContent(object):
 
     def __call__(self):
         api.content.create(
-            container=self.context,
-            type='Document',
-            title='Lorem Ipsum',
-            id='page',
+            container=self.context, type="Document", title="Lorem Ipsum", id="page"
         )
 
 
@@ -50,16 +44,16 @@ class AdaptersTestCase(unittest.TestCase):
     layer = CONTENTCREATOR_CORE_INTEGRATION_TESTING
 
     def setUp(self):
-        self.portal = self.layer['portal']
+        self.portal = self.layer["portal"]
         gsm = getGlobalSiteManager()
-        gsm.registerAdapter(CreateNewsItemContent, name='newsitem')
-        gsm.registerAdapter(CreatePageContent, name='page')
+        gsm.registerAdapter(CreateNewsItemContent, name="newsitem")
+        gsm.registerAdapter(CreatePageContent, name="page")
 
     def test_adapter(self):
-        self.assertNotIn('newsitem', self.portal)
-        self.assertNotIn('page', self.portal)
-        with api.env.adopt_roles(['Manager']):
-            for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):        
+        self.assertNotIn("newsitem", self.portal)
+        self.assertNotIn("page", self.portal)
+        with api.env.adopt_roles(["Manager"]):
+            for name, provider in getAdapters((api.portal.get(),), ICreateTestContent):
                 provider()
-        self.assertIn('newsitem', self.portal)
-        self.assertIn('page', self.portal)
+        self.assertIn("newsitem", self.portal)
+        self.assertIn("page", self.portal)
