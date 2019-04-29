@@ -13,8 +13,8 @@ from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
-import pkg_resources
 import os
+import pkg_resources
 
 try:
     pkg_resources.get_distribution("Products.Archetypes")
@@ -106,6 +106,67 @@ def create_portlets(obj, portlets):
             settings["visible"] = data["visible"]
 
 
+def generate_jpeg(width, height):
+    from io import BytesIO
+    from PIL import Image
+    from random import random
+    # Mandelbrot fractal
+    # FB - 201003254
+    # drawing area
+    xa = -2.0
+    xb = 1.0
+    ya = -1.5
+    yb = 1.5
+    maxIt = 25  # max iterations allowed
+    # image size
+    image = Image.new('RGB', (width, height))
+    c = complex(random() * 2.0 - 1.0, random() - 0.5)
+
+    for y in range(height):
+        zy = y * (yb - ya) / (height - 1) + ya
+        for x in range(width):
+            zx = x * (xb - xa) / (width - 1) + xa
+            z = complex(zx, zy)
+            for i in range(maxIt):
+                if abs(z) > 2.0:
+                    break
+                z = z * z + c
+            r = i % 4 * 64
+            g = i % 8 * 32
+            b = i % 16 * 16
+            image.putpixel((x, y), b * 65536 + g * 256 + r)
+
+    output = BytesIO()
+    image.save(output, format='PNG')
+    return output.getvalue()
+
+
+def set_image_field(obj, image):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    from plone.namedfile.file import NamedBlobImage
+    try:
+        obj.setImage(image)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        if not getattr(obj, 'image', False):
+            return
+        data = image if type(image) == str else image.getvalue()
+        obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
+    finally:
+        obj.reindexObject(idxs=['image'])
+
+
+def set_exclude_from_nav(obj):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    try:
+        obj.setExcludeFromNav(True)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        obj.exclude_from_nav = True
+    finally:
+        obj.reindexObject(idxs=['exclude_from_nav'])
+
+
 def create_item_runner(
     container,
     content_structure,
@@ -141,12 +202,16 @@ def create_item_runner(
             "id": "",
             "title": "",
             "description": "",
-            "items": [],
             "opts": {
                 "default_page": "",
+                "default_view": "",
+                "exclude_from_nav": "",
+                "local_roles": {},
+                "locally_allowed_types": [],
                 "locally_allowed_types": [],
                 "immediately_allowed_types": [],
-            }
+            },
+            "items": []
         }
     ]
 
@@ -177,6 +242,8 @@ def create_item_runner(
 
         try:
             obj = create(container, type_, id_=id_, title=title)
+
+            set_image_field(obj, generate_jpeg(768, 768))
 
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -231,6 +298,11 @@ def create_item_runner(
             opts = data.get("opts", {})
             if opts.get("default_page", False):
                 container.setDefaultPage(obj.id)
+            default_view = opts.get('default_view', False)
+            if default_view:
+                obj.setLayout(default_view)
+            if opts.get('exclude_from_nav', False):
+                set_exclude_from_nav(obj)
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
@@ -243,7 +315,7 @@ def create_item_runner(
                     be.setConstrainTypesMode(behaviors.constrains.ENABLED)
                     if locally_allowed_types:
                         be.setLocallyAllowedTypes = locally_allowed_types
-                        logger.debug(
+                        logger.warn(
                             "{0}: locally_allowed_types {1}".format(
                                 path, locally_allowed_types
                             )
@@ -252,7 +324,7 @@ def create_item_runner(
                         be.setImmediatelyAddableTypes = (
                             immediately_allowed_types
                         )  # noqa
-                        logger.debug(
+                        logger.warn(
                             "{0}: immediately_allowed_types {1}".format(
                                 path, immediately_allowed_types
                             )
@@ -265,7 +337,7 @@ def create_item_runner(
             create_portlets(obj, data.get("portlets", []))
 
             # create local roles
-            for user, roles in data.get("local_roles", {}).items():
+            for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
