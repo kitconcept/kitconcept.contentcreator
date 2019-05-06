@@ -4,10 +4,8 @@ from Acquisition.interfaces import IAcquirer
 from plone import api
 from plone.app.dexterity import behaviors
 from plone.portlets.interfaces import IPortletAssignmentSettings
-from Products.Archetypes.interfaces import IBaseObject
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
-from zExceptions import BadRequest
 from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
@@ -15,21 +13,30 @@ from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
-import pkg_resources
 import os
+import pkg_resources
+
+try:
+    pkg_resources.get_distribution("Products.Archetypes")
+    from Products.Archetypes.interfaces import IBaseObject
+
+    ARCHETYPES_PRESENT = True
+except pkg_resources.DistributionNotFound:  # pragma: no restapi
+    ARCHETYPES_PRESENT = False
 
 
 try:
-    pkg_resources.get_distribution('plone.restapi')
+    pkg_resources.get_distribution("plone.restapi")
     from plone.restapi.interfaces import IDeserializeFromJson
     from plone.restapi.services.content.utils import add
     from plone.restapi.services.content.utils import create
+
     PRESTAPI_PRESENT = True
 except pkg_resources.DistributionNotFound:  # pragma: no restapi
     PRESTAPI_PRESENT = False
 
 
-logger = logging.getLogger('collective.contentcreator')
+logger = logging.getLogger("collective.contentcreator")
 
 
 def load_json(path, base_path=None):
@@ -46,27 +53,27 @@ def load_json(path, base_path=None):
     """
     if base_path:
         path = os.path.join(os.path.dirname(base_path), path)
-    content_json = ''
-    with open(path, 'r') as file_handle:
+    content_json = ""
+    with open(path, "r") as file_handle:
         content_json = json.loads(file_handle.read())
 
     return content_json
 
 
 def add_criterion(topic, index, criterion, value=None):
-    index = index.encode('utf-8')
-    criterion = criterion.encode('utf-8')
-    name = '{0}_{1}'.format(index, criterion)
+    index = index.encode("utf-8")
+    criterion = criterion.encode("utf-8")
+    name = "{0}_{1}".format(index, criterion)
     topic.addCriterion(index, criterion)
     crit = topic.getCriterion(name)
 
     # TODO: Add extra parameter to the criterion creation for these criterion types
-    if criterion == 'ATDateRangeCriterion':
-        crit.setStart(u'2019/02/20 13:55:00 GMT-3')
-        crit.setEnd(u'2019/02/22 13:55:00 GMT-3')
-    elif criterion == 'ATSortCriterion':
+    if criterion == "ATDateRangeCriterion":
+        crit.setStart(u"2019/02/20 13:55:00 GMT-3")
+        crit.setEnd(u"2019/02/22 13:55:00 GMT-3")
+    elif criterion == "ATSortCriterion":
         crit.setReversed(True)
-    elif criterion == 'ATBooleanCriterion':
+    elif criterion == "ATBooleanCriterion":
         crit.setBool(True)
 
     if value is not None:
@@ -79,9 +86,7 @@ def create_portlets(obj, portlets):
 
     # Avoid portlet duplication
     for manager_name in portlets:
-        mapping = obj.restrictedTraverse(
-            '++contextportlets++{0}'.format(manager_name)
-        )
+        mapping = obj.restrictedTraverse("++contextportlets++{0}".format(manager_name))
         for m in mapping.keys():
             del mapping[m]
     # Avoid portlet duplication
@@ -89,26 +94,88 @@ def create_portlets(obj, portlets):
     for manager_name in portlets:
         for data in portlets[manager_name]:
             mapping = obj.restrictedTraverse(
-                '++contextportlets++{0}'.format(manager_name)
+                "++contextportlets++{0}".format(manager_name)
             )
-            addview = mapping.restrictedTraverse('+/{0}'.format(data['type']))
-            if getattr(addview, 'createAndAdd', False):
-                addview.createAndAdd(data=data['assignment'])
+            addview = mapping.restrictedTraverse("+/{0}".format(data["type"]))
+            if getattr(addview, "createAndAdd", False):
+                addview.createAndAdd(data=data["assignment"])
             else:  # Some portlets don't have assignment
                 addview.create()
-            assignment = mapping.values()[-1]
+            assignment = list(mapping.values())[-1]
             settings = IPortletAssignmentSettings(assignment)
-            settings['visible'] = data['visible']
+            settings["visible"] = data["visible"]
+
+
+def generate_jpeg(width, height):
+    from io import BytesIO
+    from PIL import Image
+    from random import random
+    # Mandelbrot fractal
+    # FB - 201003254
+    # drawing area
+    xa = -2.0
+    xb = 1.0
+    ya = -1.5
+    yb = 1.5
+    maxIt = 25  # max iterations allowed
+    # image size
+    image = Image.new('RGB', (width, height))
+    c = complex(random() * 2.0 - 1.0, random() - 0.5)
+
+    for y in range(height):
+        zy = y * (yb - ya) / (height - 1) + ya
+        for x in range(width):
+            zx = x * (xb - xa) / (width - 1) + xa
+            z = complex(zx, zy)
+            for i in range(maxIt):
+                if abs(z) > 2.0:
+                    break
+                z = z * z + c
+            r = i % 4 * 64
+            g = i % 8 * 32
+            b = i % 16 * 16
+            image.putpixel((x, y), b * 65536 + g * 256 + r)
+
+    output = BytesIO()
+    image.save(output, format='PNG')
+    return output.getvalue()
+
+
+def set_image_field(obj, image):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    from plone.namedfile.file import NamedBlobImage
+    try:
+        obj.setImage(image)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        if not getattr(obj, 'image', False):
+            return
+        data = image if type(image) == str else image.getvalue()
+        obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
+    finally:
+        obj.reindexObject(idxs=['image'])
+
+
+def set_exclude_from_nav(obj):
+    """Set image field in object on both, Archetypes and Dexterity."""
+    try:
+        obj.setExcludeFromNav(True)  # Archetypes
+    except AttributeError:
+        # Dexterity
+        obj.exclude_from_nav = True
+    finally:
+        obj.reindexObject(idxs=['exclude_from_nav'])
 
 
 def create_item_runner(
-        container,
-        content_structure,
-        auto_id=False,
-        default_lang=None,
-        default_wf_state=None,
-        ignore_wf_types=['Image', 'File'],
-        logger=logger):
+    container,
+    content_structure,
+    auto_id=False,
+    default_lang=None,
+    default_wf_state=None,
+    ignore_wf_types=["Image", "File"],
+    logger=logger,
+):
     """Create Dexterity contents from plone.restapi compatible structures.
 
     :param container: The context in which the item should be created.
@@ -135,12 +202,16 @@ def create_item_runner(
             "id": "",
             "title": "",
             "description": "",
-            "items": [],
             "opts": {
                 "default_page": "",
+                "default_view": "",
+                "exclude_from_nav": "",
+                "local_roles": {},
+                "locally_allowed_types": [],
                 "locally_allowed_types": [],
                 "immediately_allowed_types": [],
-            }
+            },
+            "items": []
         }
     ]
 
@@ -150,98 +221,136 @@ def create_item_runner(
     request = getRequest()
 
     for data in content_structure:
-
-        type_ = data.get('@type', None)
-        id_ = data.get('id', None)
-        title = data.get('title', None)
+        type_ = data.get("@type", None)
+        id_ = data.get("id", None)
+        title = data.get("title", None)
 
         if not type_:
-            raise BadRequest("Property '@type' is required")
+            logger.warn("Property '@type' is required")
+            continue
 
-        if container.portal_type == 'Topic':
-            field = data.get('field', None)
-            value = data.get('value', None)
+        if container.portal_type == "Topic":
+            field = data.get("field", None)
+            value = data.get("value", None)
             add_criterion(container, field, type_, value)
             continue
 
-        obj = create(container, type_, id_=id_, title=title)
+        # PFG
+        if type_ in ["FormSelectionField", "FormMultiSelectionField"]:
+            container.fgVocabulary = data.get("fgVocabulary", [])
+            continue
 
-        # Acquisition wrap temporarily to satisfy things like vocabularies
-        # depending on tools
-        temporarily_wrapped = False
-        if IAcquirer.providedBy(obj) and not safe_hasattr(obj, 'aq_base'):
-            obj = obj.__of__(container)
-            temporarily_wrapped = True
+        try:
+            obj = create(container, type_, id_=id_, title=title)
 
-        deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
+            set_image_field(obj, generate_jpeg(768, 768))
 
-        if deserializer is None:
-            raise BadRequest(
-                'Canno deserialize type {}'.format(obj.portal_type))
+            # Acquisition wrap temporarily to satisfy things like vocabularies
+            # depending on tools
+            temporarily_wrapped = False
+            if IAcquirer.providedBy(obj) and not safe_hasattr(obj, "aq_base"):
+                obj = obj.__of__(container)
+                temporarily_wrapped = True
 
-        # defaults
-        if not data.get('language'):
-            data['language'] = default_lang
+            deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
 
-        if not data.get('review_state'):
-            data['review_state'] = default_wf_state
+            if deserializer is None:
+                logger.warn("Cannot deserialize type {}".format(obj.portal_type))
+                continue
 
-        deserializer(validate_all=True, data=data, create=True)
+            # defaults
+            if not data.get("language"):
+                data["language"] = default_lang
 
-        if temporarily_wrapped:
-            obj = aq_base(obj)
+            if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
+                data["review_state"] = default_wf_state
 
-        if not getattr(deserializer, 'notifies_create', False):
-            notify(ObjectCreatedEvent(obj))
+            deserializer(validate_all=True, data=data, create=True)
 
-        obj = add(container, obj, rename=not bool(id_))
+            if temporarily_wrapped:
+                obj = aq_base(obj)
 
-        # Set UUID - TODO: add to p.restapi
-        if data.get('UID', False) and IBaseObject.providedBy(obj):
-            obj._setUID(data.get('UID'))
-            obj.reindexObject(idxs=['UID'])
-        else:
-            setattr(obj, '_plone.uuid', data.get('UID'))
-            obj.reindexObject(idxs=['UID'])
+            if not getattr(deserializer, "notifies_create", False):
+                notify(ObjectCreatedEvent(obj))
 
-        # Set workflow
-        if data.get('review_state', False) and obj.portal_type not in ignore_wf_types: # noqa
-            api.content.transition(obj=obj, to_state=data.get('review_state'))
+            obj = add(container, obj, rename=not bool(id_))
 
-        # set default
-        opts = data.get('opts', {})
-        if opts.get('default_page', False):
-            container.setDefaultPage(obj.id)
+            # Set UUID - TODO: add to p.restapi
+            if (
+                data.get("UID", False)
+                and ARCHETYPES_PRESENT
+                and IBaseObject.providedBy(obj)
+            ):
+                obj._setUID(data.get("UID"))
+                obj.reindexObject(idxs=["UID"])
+            else:
+                setattr(obj, "_plone.uuid", data.get("UID"))
+                obj.reindexObject(idxs=["UID"])
 
-        # CONSTRAIN TYPES
-        locally_allowed_types = opts.get('locally_allowed_types', False)
-        immediately_allowed_types = opts.get('immediately_allowed_types', False) # noqa
-        if locally_allowed_types or immediately_allowed_types:
-            be = ISelectableConstrainTypes(obj, None)
-            if be:
-                be.setConstrainTypesMode(behaviors.constrains.ENABLED)
-                if locally_allowed_types:
-                    be.setLocallyAllowedTypes = locally_allowed_types
-                    logger.debug('{0}: locally_allowed_types {1}'.format(path, locally_allowed_types))  # noqa
-                if immediately_allowed_types:
-                    be.setImmediatelyAddableTypes = immediately_allowed_types
-                    logger.debug('{0}: immediately_allowed_types {1}'.format(path, immediately_allowed_types))  # noqa
+            # Set workflow
+            if (
+                data.get("review_state", False)
+                and obj.portal_type not in ignore_wf_types
+            ):  # noqa
+                api.content.transition(obj=obj, to_state=data.get("review_state"))
 
-        id_ = obj.id  # get the real id
-        path = '/'.join(obj.getPhysicalPath())
-        logger.info('{0}: created'.format(path))
+            # set default
+            opts = data.get("opts", {})
+            if opts.get("default_page", False):
+                container.setDefaultPage(obj.id)
+            default_view = opts.get('default_view', False)
+            if default_view:
+                obj.setLayout(default_view)
+            if opts.get('exclude_from_nav', False):
+                set_exclude_from_nav(obj)
 
-        create_portlets(obj, data.get('portlets', []))
+            # CONSTRAIN TYPES
+            locally_allowed_types = opts.get("locally_allowed_types", False)
+            immediately_allowed_types = opts.get(
+                "immediately_allowed_types", False
+            )  # noqa
+            if locally_allowed_types or immediately_allowed_types:
+                be = ISelectableConstrainTypes(obj, None)
+                if be:
+                    be.setConstrainTypesMode(behaviors.constrains.ENABLED)
+                    if locally_allowed_types:
+                        be.setLocallyAllowedTypes = locally_allowed_types
+                        logger.warn(
+                            "{0}: locally_allowed_types {1}".format(
+                                path, locally_allowed_types
+                            )
+                        )  # noqa
+                    if immediately_allowed_types:
+                        be.setImmediatelyAddableTypes = (
+                            immediately_allowed_types
+                        )  # noqa
+                        logger.warn(
+                            "{0}: immediately_allowed_types {1}".format(
+                                path, immediately_allowed_types
+                            )
+                        )  # noqa
 
-        # create local roles
-        for user, roles in data.get('local_roles', {}).items():
-            obj.manage_setLocalRoles(user, roles)
+            id_ = obj.id  # get the real id
+            path = "/".join(obj.getPhysicalPath())
+            logger.info("{0}: created".format(path))
+
+            create_portlets(obj, data.get("portlets", []))
+
+            # create local roles
+            for user, roles in opts.get("local_roles", {}).items():
+                obj.manage_setLocalRoles(user, roles)
+        except Exception as e:
+            container_path = "/".join(container.getPhysicalPath())
+            message = 'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}'  # noqa
+            logger.warn(message.format(type_, container_path, id_, e.message))
+            continue
 
         # Call recursively
         create_item_runner(
             obj,
-            content_structure=data.get('items', []),
+            content_structure=data.get("items", []),
             default_lang=default_lang,
             default_wf_state=default_wf_state,
+            ignore_wf_types=ignore_wf_types,
             logger=logger,
         )

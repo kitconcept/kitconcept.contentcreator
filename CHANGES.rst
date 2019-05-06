@@ -1,9 +1,18 @@
 Changelog
 =========
 
+1.0.1 (unreleased)
+------------------
 
-1.0.0a1 (2019-05-06)
---------------------
+- Port to Python 3.
+  [sneridagh]
+
+- Documentation.
+  [sneridagh]
+
+
+1.0.0 (2019-03-26)
+------------------
 
 - Initial release.
   [kitconcept]
