@@ -286,8 +286,9 @@ def create_item_runner(
                 obj._setUID(data.get("UID"))
                 obj.reindexObject(idxs=["UID"])
             else:
-                setattr(obj, "_plone.uuid", data.get("UID"))
-                obj.reindexObject(idxs=["UID"])
+                if data.get("UID"):
+                    setattr(obj, "_plone.uuid", data.get("UID"))
+                    obj.reindexObject(idxs=["UID"])
 
             # Set workflow
             if (
