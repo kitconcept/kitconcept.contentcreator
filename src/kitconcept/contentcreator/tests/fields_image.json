@@ -1,0 +1,12 @@
+[{
+  "id": "an-image",
+  "@type": "Image",
+  "title": "Test Image",
+  "set_dummy_image": true
+},
+{
+  "id": "another-image",
+  "@type": "Image",
+  "title": "Another Test Image",
+  "set_local_image": "image.png"
+}]

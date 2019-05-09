@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
+from kitconcept.contentcreator.dummy_image import generate_image
 from plone import api
 from plone.app.dexterity import behaviors
+from plone.dexterity.interfaces import IDexterityContent
+from plone.namedfile.file import NamedBlobImage
 from plone.portlets.interfaces import IPortletAssignmentSettings
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
@@ -15,6 +18,7 @@ import json
 import logging
 import os
 import pkg_resources
+
 
 try:
     pkg_resources.get_distribution("Products.Archetypes")
@@ -106,58 +110,6 @@ def create_portlets(obj, portlets):
             settings["visible"] = data["visible"]
 
 
-def generate_jpeg(width, height):
-    from io import BytesIO
-    from PIL import Image
-    from random import random
-
-    # Mandelbrot fractal
-    # FB - 201003254
-    # drawing area
-    xa = -2.0
-    xb = 1.0
-    ya = -1.5
-    yb = 1.5
-    maxIt = 25  # max iterations allowed
-    # image size
-    image = Image.new("RGB", (width, height))
-    c = complex(random() * 2.0 - 1.0, random() - 0.5)
-
-    for y in range(height):
-        zy = y * (yb - ya) / (height - 1) + ya
-        for x in range(width):
-            zx = x * (xb - xa) / (width - 1) + xa
-            z = complex(zx, zy)
-            for i in range(maxIt):
-                if abs(z) > 2.0:
-                    break
-                z = z * z + c
-            r = i % 4 * 64
-            g = i % 8 * 32
-            b = i % 16 * 16
-            image.putpixel((x, y), b * 65536 + g * 256 + r)
-
-    output = BytesIO()
-    image.save(output, format="PNG")
-    return output.getvalue()
-
-
-def set_image_field(obj, image):
-    """Set image field in object on both, Archetypes and Dexterity."""
-    from plone.namedfile.file import NamedBlobImage
-
-    try:
-        obj.setImage(image)  # Archetypes
-    except AttributeError:
-        # Dexterity
-        if not getattr(obj, "image", False):
-            return
-        data = image if type(image) == str else image.getvalue()
-        obj.image = NamedBlobImage(data=data, contentType="image/jpeg")
-    finally:
-        obj.reindexObject(idxs=["image"])
-
-
 def set_exclude_from_nav(obj):
     """Set image field in object on both, Archetypes and Dexterity."""
     try:
@@ -172,6 +124,7 @@ def set_exclude_from_nav(obj):
 def create_item_runner(
     container,
     content_structure,
+    base_image_path=__file__,
     auto_id=False,
     default_lang=None,
     default_wf_state=None,
@@ -245,7 +198,7 @@ def create_item_runner(
         try:
             obj = create(container, type_, id_=id_, title=title)
 
-            set_image_field(obj, generate_jpeg(768, 768))
+            # set_image_field(obj, generate_jpeg(768, 768))
 
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -266,6 +219,37 @@ def create_item_runner(
 
             if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
                 data["review_state"] = default_wf_state
+
+            # Populate image if any
+            if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
+                if data.get("set_dummy_image", False):
+                    obj.setImage(generate_image())
+                if data.get("set_local_image", False):
+                    image = open(
+                        os.path.join(
+                            os.path.dirname(base_image_path),
+                            data.get("set_local_image"),
+                        ),
+                        "rb",
+                    )
+                    obj.setImage(image.read())
+
+            if IDexterityContent.providedBy(obj) and hasattr(obj, "image"):
+                if data.get("set_dummy_image", False):
+                    obj.image = NamedBlobImage(
+                        data=generate_image().tobytes(), contentType="image/png"
+                    )
+                if data.get("set_local_image", False):
+                    image = open(
+                        os.path.join(
+                            os.path.dirname(base_image_path),
+                            data.get("set_local_image"),
+                        ),
+                        "rb",
+                    )
+                    obj.image = NamedBlobImage(
+                        data=image.read(), contentType="image/png"
+                    )
 
             deserializer(validate_all=True, data=data, create=True)
 
