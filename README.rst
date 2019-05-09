@@ -76,6 +76,64 @@ this should be the declaration in the other package::
               ],
           )
 
+Images
+------
+
+For the creation of images, you can use the plone.restapi approach using the
+following serialization mapping containg the file data and some additional
+metadata:
+
+- ``data`` - the base64 encoded contents of the file
+- ``encoding`` - the encoding you used to encode the data, so usually `base64`
+- ``content-type`` - the MIME type of the file
+- ``filename`` - the name of the file, including extension
+
+.. code-block:: json
+
+      {
+        "...": "",
+        "@type": "File",
+        "title": "My file",
+        "file": {
+            "data": "TG9yZW0gSXBzdW0uCg==",
+            "encoding": "base64",
+            "filename": "lorem.txt",
+            "content-type": "text/plain"}
+      }
+
+Alternativelly, you can provide the image an extra property ``set_dummy_image``
+that will create a dummy image placeholder in the created content type::
+
+.. code-block:: json
+
+      {
+        "id": "an-image",
+        "@type": "Image",
+        "title": "Test Image",
+        "set_dummy_image": true
+      }
+
+or especify a real image::
+
+.. code-block:: json
+
+      {
+        "id": "another-image",
+        "@type": "Image",
+        "title": "Another Test Image",
+        "set_local_image": "image.png"
+      }
+
+You can specify the ``base_path`` for the image in the ``create_item_runner``::
+
+  create_item_runner(
+      api.portal.get(),
+      content_structure,
+      default_lang='en',
+      default_wf_state='published',
+      base_image_path=__file__
+  )
+
 
 Development
 -----------
