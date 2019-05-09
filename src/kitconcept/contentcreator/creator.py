@@ -13,6 +13,8 @@ from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
 from zope.lifecycleevent import ObjectCreatedEvent
+from six import StringIO
+from OFS.Image import Image
 
 import json
 import logging
@@ -223,7 +225,9 @@ def create_item_runner(
             # Populate image if any
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
-                    obj.setImage(generate_image())
+                    new_file = StringIO()
+                    generate_image().save(new_file, 'png')
+                    obj.setImage(Image('test.png', 'test.png', new_file))
                 if data.get("set_local_image", False):
                     image = open(
                         os.path.join(
