@@ -342,7 +342,7 @@ def create_item_runner(
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
             message = 'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}'  # noqa
-            logger.warn(message.format(type_, container_path, id_, e.message))
+            logger.warn(message.format(type_, container_path, id_, e.args[0]))
             continue
 
         # Call recursively
