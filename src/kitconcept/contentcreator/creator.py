@@ -110,6 +110,7 @@ def generate_jpeg(width, height):
     from io import BytesIO
     from PIL import Image
     from random import random
+
     # Mandelbrot fractal
     # FB - 201003254
     # drawing area
@@ -119,7 +120,7 @@ def generate_jpeg(width, height):
     yb = 1.5
     maxIt = 25  # max iterations allowed
     # image size
-    image = Image.new('RGB', (width, height))
+    image = Image.new("RGB", (width, height))
     c = complex(random() * 2.0 - 1.0, random() - 0.5)
 
     for y in range(height):
@@ -137,23 +138,24 @@ def generate_jpeg(width, height):
             image.putpixel((x, y), b * 65536 + g * 256 + r)
 
     output = BytesIO()
-    image.save(output, format='PNG')
+    image.save(output, format="PNG")
     return output.getvalue()
 
 
 def set_image_field(obj, image):
     """Set image field in object on both, Archetypes and Dexterity."""
     from plone.namedfile.file import NamedBlobImage
+
     try:
         obj.setImage(image)  # Archetypes
     except AttributeError:
         # Dexterity
-        if not getattr(obj, 'image', False):
+        if not getattr(obj, "image", False):
             return
         data = image if type(image) == str else image.getvalue()
-        obj.image = NamedBlobImage(data=data, contentType='image/jpeg')
+        obj.image = NamedBlobImage(data=data, contentType="image/jpeg")
     finally:
-        obj.reindexObject(idxs=['image'])
+        obj.reindexObject(idxs=["image"])
 
 
 def set_exclude_from_nav(obj):
@@ -164,7 +166,7 @@ def set_exclude_from_nav(obj):
         # Dexterity
         obj.exclude_from_nav = True
     finally:
-        obj.reindexObject(idxs=['exclude_from_nav'])
+        obj.reindexObject(idxs=["exclude_from_nav"])
 
 
 def create_item_runner(
@@ -298,10 +300,10 @@ def create_item_runner(
             opts = data.get("opts", {})
             if opts.get("default_page", False):
                 container.setDefaultPage(obj.id)
-            default_view = opts.get('default_view', False)
+            default_view = opts.get("default_view", False)
             if default_view:
                 obj.setLayout(default_view)
-            if opts.get('exclude_from_nav', False):
+            if opts.get("exclude_from_nav", False):
                 set_exclude_from_nav(obj)
 
             # CONSTRAIN TYPES
