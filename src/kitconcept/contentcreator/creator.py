@@ -126,7 +126,7 @@ def set_exclude_from_nav(obj):
 def create_item_runner(
     container,
     content_structure,
-    base_image_path=__file__,
+    base_image_path=os.path.dirname(__file__),
     auto_id=False,
     default_lang=None,
     default_wf_state=None,
@@ -231,7 +231,7 @@ def create_item_runner(
                 if data.get("set_local_image", False):
                     image = open(
                         os.path.join(
-                            os.path.dirname(base_image_path),
+                            base_image_path,
                             data.get("set_local_image"),
                         ),
                         "rb",
@@ -246,7 +246,7 @@ def create_item_runner(
                 if data.get("set_local_image", False):
                     image = open(
                         os.path.join(
-                            os.path.dirname(base_image_path),
+                            base_image_path,
                             data.get("set_local_image"),
                         ),
                         "rb",
@@ -344,4 +344,5 @@ def create_item_runner(
             default_wf_state=default_wf_state,
             ignore_wf_types=ignore_wf_types,
             logger=logger,
+            base_image_path=base_image_path
         )
