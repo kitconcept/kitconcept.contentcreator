@@ -2,6 +2,8 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
+import os
+
 
 def generate_image(width=400, height=300):
     image = Image.new("RGB", (width, height), color=(73, 109, 137))
@@ -12,7 +14,8 @@ def generate_image(width=400, height=300):
     )
 
     text = u"{} x {}".format(width, height)
-    font = ImageFont.truetype("Poppins-Regular.ttf", 20)
+    font = ImageFont.truetype(
+        os.path.join(os.path.dirname(__file__), "Poppins-Regular.ttf"), 20)
     center = (width / 2, height / 2)
     text_size = font.getsize(text)
     text_center = (center[0] - text_size[0] / 2, center[1] - text_size[1] / 2)
