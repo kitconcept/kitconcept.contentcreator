@@ -342,7 +342,7 @@ def create_item_runner(
             create_portlets(obj, data.get("portlets", []))
 
             # Enable Tiles behavior
-            if data.get("tiles", False):
+            if data.get("tiles", None) is not None:
                 enable_tiles_behavior(type_)
 
             # create local roles

@@ -4,6 +4,7 @@ from kitconcept.contentcreator.creator import load_json
 from kitconcept.contentcreator.testing import CONTENTCREATOR_CORE_INTEGRATION_TESTING  # noqa
 from plone import api
 from plone.app.testing import applyProfile
+from plone.restapi.behaviors import ITiles
 
 import unittest
 
@@ -29,6 +30,7 @@ class CreatorTestCase(unittest.TestCase):
             )
         self.assertIn('a-test-page', self.portal.objectIds())
         self.assertTrue(self.portal['a-test-page'].tiles['de4dcc60-aead-4188-a352-78a2e5c6adf8']['text']['blocks'][0]['text'] == 'HELLOOOOO') # noqa
+        self.assertTrue(ITiles.providedBy(self.portal['a-test-page']))
 
     def test_image_fields(self):
         content_structure = load_json("fields_image.json", __file__)
