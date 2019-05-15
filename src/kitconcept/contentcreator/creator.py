@@ -123,6 +123,20 @@ def set_exclude_from_nav(obj):
         obj.reindexObject(idxs=["exclude_from_nav"])
 
 
+def enable_tiles_behavior(portal_type):
+    """Enable Related Items behavior on the specified portal type."""
+    from plone.dexterity.interfaces import IDexterityFTI
+    from zope.component import queryUtility
+
+    fti = queryUtility(IDexterityFTI, name=portal_type)
+    behavior = 'plone.restapi.behaviors.ITiles'
+    if behavior in fti.behaviors:
+        return
+    behaviors = list(fti.behaviors)
+    behaviors.append(behavior)
+    fti.behaviors = tuple(behaviors)
+
+
 def create_item_runner(
     container,
     content_structure,
@@ -326,6 +340,10 @@ def create_item_runner(
             logger.info("{0}: created".format(path))
 
             create_portlets(obj, data.get("portlets", []))
+
+            # Enable Tiles behavior
+            if data.get("tiles", False):
+                enable_tiles_behavior(type_)
 
             # create local roles
             for user, roles in opts.get("local_roles", {}).items():
