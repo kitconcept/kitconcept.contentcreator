@@ -6,6 +6,7 @@ from plone import api
 from plone.app.testing import applyProfile
 from plone.restapi.behaviors import ITiles
 
+import os
 import unittest
 
 
@@ -41,7 +42,7 @@ class CreatorTestCase(unittest.TestCase):
                 content_structure,
                 default_lang="en",
                 default_wf_state="published",
-                base_image_path=__file__
+                base_image_path=os.path.dirname(__file__),
             )
         self.assertIn('an-image', self.portal.objectIds())
         self.assertTrue(self.portal['an-image'].image)
