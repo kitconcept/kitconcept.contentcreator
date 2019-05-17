@@ -34,4 +34,13 @@
           "de4dcc60-aead-4188-a352-78a2e5c6adf8"
       ]
   }
+},
+{
+  "id": "a-empty-tiles",
+  "@type": "Document",
+  "title": "Test Document",
+  "tiles": { },
+  "tiles_layout": {
+      "items": [ ]
+  }
 }]
