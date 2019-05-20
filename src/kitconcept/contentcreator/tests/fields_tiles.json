@@ -34,4 +34,10 @@
           "de4dcc60-aead-4188-a352-78a2e5c6adf8"
       ]
   }
-}]
+},
+{
+    "id": "a-test-page-with-default-tiles",
+    "@type": "Document",
+    "title": "Test Document"
+  }
+]

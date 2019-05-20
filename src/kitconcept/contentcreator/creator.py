@@ -44,6 +44,19 @@ except pkg_resources.DistributionNotFound:  # pragma: no restapi
 
 logger = logging.getLogger("collective.contentcreator")
 
+DEFAULT_TILES = {
+    "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
+    "35240ad8-3625-4611-b76f-03471bcf6b34": {"@type": "description"},
+    "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "text"},
+}
+DEFAULT_TILES_LAYOUT = {
+    "items": [
+        "d3f1c443-583f-4e8e-a682-3bf25752a300",
+        "35240ad8-3625-4611-b76f-03471bcf6b34",
+        "7624cf59-05d0-4055-8f55-5fd6597d84b0",
+    ]
+}
+
 
 def load_json(path, base_path=None):
     """Load JSON from a file.
@@ -227,6 +240,12 @@ def create_item_runner(
             if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
                 data["review_state"] = default_wf_state
 
+            # Populate default tiles if the content has the behavior enabled
+            # And no tiles in the creation or in the existing object
+            if hasattr(obj, "tiles") and not data.get("tiles", False) and not obj.tiles:
+                obj.tiles = DEFAULT_TILES
+                obj.tiles_layout = DEFAULT_TILES_LAYOUT
+
             # Populate image if any
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
@@ -350,5 +369,5 @@ def create_item_runner(
             default_wf_state=default_wf_state,
             ignore_wf_types=ignore_wf_types,
             logger=logger,
-            base_image_path=base_image_path
+            base_image_path=base_image_path,
         )

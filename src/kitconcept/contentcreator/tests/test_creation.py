@@ -31,6 +31,21 @@ class CreatorTestCase(unittest.TestCase):
         self.assertIn('a-test-page', self.portal.objectIds())
         self.assertTrue(self.portal['a-test-page'].tiles['de4dcc60-aead-4188-a352-78a2e5c6adf8']['text']['blocks'][0]['text'] == 'HELLOOOOO') # noqa
 
+    def test_default_tiles_fields(self):
+        content_structure = load_json("fields_tiles.json", __file__)
+
+        applyProfile(self.portal, 'plone.restapi:tiles')
+
+        with api.env.adopt_roles(["Manager"]):
+            create_item_runner(
+                self.portal,
+                content_structure,
+                default_lang="en",
+                default_wf_state="published",
+            )
+        self.assertIn('a-test-page-with-default-tiles', self.portal.objectIds())
+        self.assertEqual(3, len(self.portal['a-test-page-with-default-tiles'].tiles.items())) # noqa
+
     def test_image_fields(self):
         content_structure = load_json("fields_image.json", __file__)
 
