@@ -5,6 +5,7 @@ from kitconcept.contentcreator.testing import CONTENTCREATOR_CORE_INTEGRATION_TE
 from plone import api
 from plone.app.testing import applyProfile
 
+import os
 import unittest
 
 
@@ -39,10 +40,26 @@ class CreatorTestCase(unittest.TestCase):
                 content_structure,
                 default_lang="en",
                 default_wf_state="published",
-                base_image_path=__file__
+                base_image_path=os.path.dirname(__file__)
             )
         self.assertIn('an-image', self.portal.objectIds())
         self.assertTrue(self.portal['an-image'].image)
 
         self.assertIn('another-image', self.portal.objectIds())
         self.assertTrue(self.portal['another-image'].image)
+
+    def test_edit_if_content_already_exists(self):
+        content_structure = load_json("test_content.json", __file__)
+
+        self.portal.invokeFactory('Folder', 'a-folder')
+        self.assertIn('a-folder', self.portal.objectIds())
+
+        with api.env.adopt_roles(["Manager"]):
+            create_item_runner(
+                self.portal,
+                content_structure,
+                default_lang="en",
+                default_wf_state="published",
+            )
+
+        self.assertEquals(self.portal['a-folder'].description, "The description")

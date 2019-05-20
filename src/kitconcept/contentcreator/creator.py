@@ -197,11 +197,16 @@ def create_item_runner(
             container.fgVocabulary = data.get("fgVocabulary", [])
             continue
 
-        try:
+        if container.get(id_, False):
+            # We check if the object is already created, if so we edit it
+            obj = container[id_]
+            create_object = False
+        else:
+            # if don't we create it
             obj = create(container, type_, id_=id_, title=title)
+            create_object = True
 
-            # set_image_field(obj, generate_jpeg(768, 768))
-
+        try:
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
             temporarily_wrapped = False
@@ -260,10 +265,11 @@ def create_item_runner(
             if temporarily_wrapped:
                 obj = aq_base(obj)
 
-            if not getattr(deserializer, "notifies_create", False):
-                notify(ObjectCreatedEvent(obj))
+            if create_object:
+                if not getattr(deserializer, "notifies_create", False):
+                    notify(ObjectCreatedEvent(obj))
 
-            obj = add(container, obj, rename=not bool(id_))
+                obj = add(container, obj, rename=not bool(id_))
 
             # Set UUID - TODO: add to p.restapi
             if (
@@ -295,6 +301,10 @@ def create_item_runner(
             if opts.get("exclude_from_nav", False):
                 set_exclude_from_nav(obj)
 
+            id_ = obj.id  # get the real id
+            path = "/".join(obj.getPhysicalPath())
+            logger.info("{0}: created".format(path))
+
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
             immediately_allowed_types = opts.get(
@@ -321,10 +331,6 @@ def create_item_runner(
                             )
                         )  # noqa
 
-            id_ = obj.id  # get the real id
-            path = "/".join(obj.getPhysicalPath())
-            logger.info("{0}: created".format(path))
-
             create_portlets(obj, data.get("portlets", []))
 
             # create local roles
@@ -332,8 +338,8 @@ def create_item_runner(
                 obj.manage_setLocalRoles(user, roles)
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
-            message = 'Could not create (type: "{0}", container: "{1}", id: "{2}") exception: {3}'  # noqa
-            logger.warn(message.format(type_, container_path, id_, e.args[0]))
+            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}") exception: {3}'  # noqa
+            logger.error(message.format(type_, container_path, id_, e.args[0]))
             continue
 
         # Call recursively
