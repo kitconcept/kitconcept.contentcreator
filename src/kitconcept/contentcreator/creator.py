@@ -250,15 +250,11 @@ def create_item_runner(
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
                     new_file = StringIO()
-                    generate_image().save(new_file, 'png')
-                    obj.setImage(Image('test.png', 'test.png', new_file))
+                    generate_image().save(new_file, "png")
+                    obj.setImage(Image("test.png", "test.png", new_file))
                 if data.get("set_local_image", False):
                     image = open(
-                        os.path.join(
-                            base_image_path,
-                            data.get("set_local_image"),
-                        ),
-                        "rb",
+                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
                     obj.setImage(image.read())
 
@@ -269,11 +265,7 @@ def create_item_runner(
                     )
                 if data.get("set_local_image", False):
                     image = open(
-                        os.path.join(
-                            base_image_path,
-                            data.get("set_local_image"),
-                        ),
-                        "rb",
+                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
                     obj.image = NamedBlobImage(
                         data=image.read(), contentType="image/png"
