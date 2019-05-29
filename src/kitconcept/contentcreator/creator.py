@@ -13,7 +13,7 @@ from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
 from zope.lifecycleevent import ObjectCreatedEvent
-from six import StringIO
+from six import BytesIO
 from OFS.Image import Image
 
 import json
@@ -249,7 +249,7 @@ def create_item_runner(
             # Populate image if any
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
-                    new_file = StringIO()
+                    new_file = BytesIO()
                     generate_image().save(new_file, "png")
                     obj.setImage(Image("test.png", "test.png", new_file))
                 if data.get("set_local_image", False):
@@ -262,12 +262,15 @@ def create_item_runner(
                 if data.get("set_dummy_image", False) and isinstance(
                     data.get("set_dummy_image"), list
                 ):
+                    image = BytesIO()
+                    generate_image().save(image, "png")
+                    image = image if type(image) == str else image.getvalue()
                     for image_field in data["set_dummy_image"]:
                         setattr(
                             obj,
                             image_field,
                             NamedBlobImage(
-                                data=generate_image().tobytes(), contentType="image/png"
+                                data=image, contentType="image/png"
                             ),
                         )
 
