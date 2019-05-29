@@ -72,6 +72,23 @@ class CreatorTestCase(unittest.TestCase):
         self.assertIn("another-image", self.portal.objectIds())
         self.assertTrue(self.portal["another-image"].image)
 
+    def test_image_fields_deprecated(self):
+        content_structure = load_json("fields_image.json", __file__)
+
+        with api.env.adopt_roles(["Manager"]):
+            create_item_runner(
+                self.portal,
+                content_structure,
+                default_lang="en",
+                default_wf_state="published",
+                base_image_path=os.path.dirname(__file__),
+            )
+        self.assertIn("an-image-deprecated", self.portal.objectIds())
+        self.assertTrue(self.portal["an-image-deprecated"].image)
+
+        self.assertIn("another-image-deprecated", self.portal.objectIds())
+        self.assertTrue(self.portal["another-image-deprecated"].image)
+
     def test_edit_if_content_already_exists(self):
         content_structure = load_json("test_content.json", __file__)
 

@@ -258,12 +258,41 @@ def create_item_runner(
                     )
                     obj.setImage(image.read())
 
-            if IDexterityContent.providedBy(obj) and hasattr(obj, "image"):
-                if data.get("set_dummy_image", False):
+            if IDexterityContent.providedBy(obj):
+                if data.get("set_dummy_image", False) and isinstance(
+                    data.get("set_dummy_image"), list
+                ):
+                    for image_field in data["set_dummy_image"]:
+                        setattr(
+                            obj,
+                            image_field,
+                            NamedBlobImage(
+                                data=generate_image().tobytes(), contentType="image/png"
+                            ),
+                        )
+
+                elif data.get("set_dummy_image", False) and isinstance(
+                    data.get("set_dummy_image"), bool
+                ):
+                    # Legacy behavior, set_dummy_image is a boolean
                     obj.image = NamedBlobImage(
                         data=generate_image().tobytes(), contentType="image/png"
                     )
-                if data.get("set_local_image", False):
+
+                if data.get("set_local_image", False) and isinstance(
+                    data.get("set_local_image"), dict
+                ):
+                    for image_data in data["set_local_image"].items():
+                        image = open(os.path.join(base_image_path, image_data[1]), "rb")
+                        setattr(
+                            obj,
+                            image_data[0],
+                            NamedBlobImage(data=image.read(), contentType="image/png"),
+                        )
+
+                elif data.get("set_local_image", False) and isinstance(
+                    data.get("set_local_image"), str
+                ):
                     image = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )

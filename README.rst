@@ -102,7 +102,20 @@ metadata:
       }
 
 Alternativelly, you can provide the image an extra property ``set_dummy_image``
-that will create a dummy image placeholder in the created content type::
+with an array of (image) field names that will create a dummy image placeholder
+in the specified fields in the to be created content type::
+
+.. code-block:: json
+
+      {
+        "id": "an-image",
+        "@type": "Image",
+        "title": "Test Image",
+        "set_dummy_image": ["image"]
+      }
+
+the deprecated form is also supported (it will create the image in the
+``image`` field)::
 
 .. code-block:: json
 
@@ -113,7 +126,20 @@ that will create a dummy image placeholder in the created content type::
         "set_dummy_image": true
       }
 
-or especify a real image::
+You can specify a real image too, using a dict in the ``set_local_image`` JSON
+attribute with the field name and the filename of the real image::
+
+.. code-block:: json
+
+      {
+        "id": "another-image",
+        "@type": "Image",
+        "title": "Another Test Image",
+        "set_local_image": {"image": "image.png"}
+      }
+
+the deprecated form is also supported (it will create the image in the
+``image`` field)::
 
 .. code-block:: json
 

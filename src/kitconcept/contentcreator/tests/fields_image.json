@@ -1,12 +1,24 @@
 [{
-  "id": "an-image",
+  "id": "an-image-deprecated",
   "@type": "Image",
   "title": "Test Image",
   "set_dummy_image": true
 },
 {
-  "id": "another-image",
+  "id": "another-image-deprecated",
   "@type": "Image",
   "title": "Another Test Image",
   "set_local_image": "image.png"
+},
+{
+  "id": "an-image",
+  "@type": "Image",
+  "title": "Test Image",
+  "set_dummy_image": ["image"]
+},
+{
+  "id": "another-image",
+  "@type": "Image",
+  "title": "Another Test Image",
+  "set_local_image": {"image": "image.png"}
 }]
