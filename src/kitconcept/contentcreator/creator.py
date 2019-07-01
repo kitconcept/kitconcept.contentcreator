@@ -136,7 +136,7 @@ def set_exclude_from_nav(obj):
         obj.reindexObject(idxs=["exclude_from_nav"])
 
 
-def create_item_runner(
+def create_item_runner(  # noqa
     container,
     content_structure,
     base_image_path=os.path.dirname(__file__),
@@ -269,9 +269,7 @@ def create_item_runner(
                         setattr(
                             obj,
                             image_field,
-                            NamedBlobImage(
-                                data=image, contentType="image/png"
-                            ),
+                            NamedBlobImage(data=image, contentType="image/png"),
                         )
 
                 elif data.get("set_dummy_image", False) and isinstance(
