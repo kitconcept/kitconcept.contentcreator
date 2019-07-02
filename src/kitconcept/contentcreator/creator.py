@@ -44,15 +44,17 @@ except pkg_resources.DistributionNotFound:  # pragma: no restapi
 
 logger = logging.getLogger("collective.contentcreator")
 
+# Removing description tile from the creator, bring it back parameterized if
+# required
 DEFAULT_TILES = {
     "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
-    "35240ad8-3625-4611-b76f-03471bcf6b34": {"@type": "description"},
+    # "35240ad8-3625-4611-b76f-03471bcf6b34": {"@type": "description"},
     "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "text"},
 }
 DEFAULT_TILES_LAYOUT = {
     "items": [
         "d3f1c443-583f-4e8e-a682-3bf25752a300",
-        "35240ad8-3625-4611-b76f-03471bcf6b34",
+        # "35240ad8-3625-4611-b76f-03471bcf6b34",
         "7624cf59-05d0-4055-8f55-5fd6597d84b0",
     ]
 }
