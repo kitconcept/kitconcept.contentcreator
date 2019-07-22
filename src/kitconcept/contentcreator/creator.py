@@ -6,6 +6,7 @@ from plone import api
 from plone.app.dexterity import behaviors
 from plone.dexterity.interfaces import IDexterityContent
 from plone.namedfile.file import NamedBlobImage
+from plone.namedfile.file import NamedBlobFile
 from plone.portlets.interfaces import IPortletAssignmentSettings
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
@@ -253,12 +254,22 @@ def create_item_runner(  # noqa
                 if data.get("set_dummy_image", False):
                     new_file = BytesIO()
                     generate_image().save(new_file, "png")
-                    obj.setImage(Image("test.png", "test.png", new_file))
+                    if obj.portal_type == 'Image':
+                        obj.setImage(Image("test.png", "test.png", new_file))
+                    else:
+                        obj.setFilename("test.png")
+                        obj.setFile(new_file)
+                        obj.setFormat("image/png")
                 if data.get("set_local_image", False):
                     image = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
-                    obj.setImage(image.read())
+                    if obj.portal_type == 'Image':
+                        obj.setImage(image.read())
+                    else:
+                        obj.setFilename(os.path.basename(data.get("set_local_image")))
+                        obj.setFile(image.read())
+                        obj.setFormat("image/png")
 
             if IDexterityContent.providedBy(obj):
                 if data.get("set_dummy_image", False) and isinstance(
@@ -268,30 +279,49 @@ def create_item_runner(  # noqa
                     generate_image().save(image, "png")
                     image = image if type(image) == str else image.getvalue()
                     for image_field in data["set_dummy_image"]:
-                        setattr(
-                            obj,
-                            image_field,
-                            NamedBlobImage(data=image, contentType="image/png"),
-                        )
+                        if obj.portal_type == 'Image':
+                            setattr(
+                                obj,
+                                image_field,
+                                NamedBlobImage(data=image, contentType="image/png"),
+                            )
+                        else:
+                            setattr(
+                                obj,
+                                image_field,
+                                NamedBlobFile(data=image, contentType="image/png"),
+                            )
 
                 elif data.get("set_dummy_image", False) and isinstance(
                     data.get("set_dummy_image"), bool
                 ):
                     # Legacy behavior, set_dummy_image is a boolean
-                    obj.image = NamedBlobImage(
-                        data=generate_image().tobytes(), contentType="image/png"
-                    )
+                    if obj.portal_type == 'Image':
+                        obj.image = NamedBlobImage(
+                            data=generate_image().tobytes(), contentType="image/png"
+                        )
+                    else:
+                        obj.file = NamedBlobFile(
+                            data=generate_image().tobytes(), contentType="image/png"
+                        )
 
                 if data.get("set_local_image", False) and isinstance(
                     data.get("set_local_image"), dict
                 ):
                     for image_data in data["set_local_image"].items():
                         image = open(os.path.join(base_image_path, image_data[1]), "rb")
-                        setattr(
-                            obj,
-                            image_data[0],
-                            NamedBlobImage(data=image.read(), contentType="image/png"),
-                        )
+                        if obj.portal_type == 'Image':
+                            setattr(
+                                obj,
+                                image_data[0],
+                                NamedBlobImage(data=image.read(), contentType="image/png"),
+                            )
+                        else:
+                            setattr(
+                                obj,
+                                image_data[0],
+                                NamedBlobFile(data=image.read(), contentType="image/png"),
+                            )
 
                 elif data.get("set_local_image", False) and isinstance(
                     data.get("set_local_image"), str
