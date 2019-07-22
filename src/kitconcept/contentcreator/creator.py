@@ -254,7 +254,7 @@ def create_item_runner(  # noqa
                 if data.get("set_dummy_image", False):
                     new_file = BytesIO()
                     generate_image().save(new_file, "png")
-                    if obj.portal_type == 'Image':
+                    if obj.portal_type == "Image":
                         obj.setImage(Image("test.png", "test.png", new_file))
                     else:
                         obj.setFilename("test.png")
@@ -264,7 +264,7 @@ def create_item_runner(  # noqa
                     image = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
-                    if obj.portal_type == 'Image':
+                    if obj.portal_type == "Image":
                         obj.setImage(image.read())
                     else:
                         obj.setFilename(os.path.basename(data.get("set_local_image")))
@@ -279,7 +279,7 @@ def create_item_runner(  # noqa
                     generate_image().save(image, "png")
                     image = image if type(image) == str else image.getvalue()
                     for image_field in data["set_dummy_image"]:
-                        if obj.portal_type == 'Image':
+                        if obj.portal_type == "Image":
                             setattr(
                                 obj,
                                 image_field,
@@ -296,7 +296,7 @@ def create_item_runner(  # noqa
                     data.get("set_dummy_image"), bool
                 ):
                     # Legacy behavior, set_dummy_image is a boolean
-                    if obj.portal_type == 'Image':
+                    if obj.portal_type == "Image":
                         obj.image = NamedBlobImage(
                             data=generate_image().tobytes(), contentType="image/png"
                         )
@@ -310,17 +310,21 @@ def create_item_runner(  # noqa
                 ):
                     for image_data in data["set_local_image"].items():
                         image = open(os.path.join(base_image_path, image_data[1]), "rb")
-                        if obj.portal_type == 'Image':
+                        if obj.portal_type == "Image":
                             setattr(
                                 obj,
                                 image_data[0],
-                                NamedBlobImage(data=image.read(), contentType="image/png"),
+                                NamedBlobImage(
+                                    data=image.read(), contentType="image/png"
+                                ),
                             )
                         else:
                             setattr(
                                 obj,
                                 image_data[0],
-                                NamedBlobFile(data=image.read(), contentType="image/png"),
+                                NamedBlobFile(
+                                    data=image.read(), contentType="image/png"
+                                ),
                             )
 
                 elif data.get("set_local_image", False) and isinstance(
