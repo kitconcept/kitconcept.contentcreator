@@ -21,4 +21,10 @@
   "@type": "Image",
   "title": "Another Test Image",
   "set_local_image": {"image": "image.png"}
+},
+{
+  "id": "news-item-image",
+  "@type": "News Item",
+  "title": "News Item with Image",
+  "set_local_image": {"image": "image.png"}
 }]

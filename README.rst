@@ -150,6 +150,53 @@ the deprecated form is also supported (it will create the image in the
         "set_local_image": "image.png"
       }
 
+the same happen with files::
+
+.. code-block:: json
+
+      {
+        "id": "an-file",
+        "@type": "File",
+        "title": "Test File",
+        "set_dummy_file": ["file"]
+      }
+
+the deprecated form is also supported (it will create the file in the
+``file`` field)::
+
+.. code-block:: json
+
+      {
+        "id": "an-file",
+        "@type": "File",
+        "title": "Test File",
+        "set_dummy_file": true
+      }
+
+You can specify a real file too, using a dict in the ``set_local_file`` JSON
+attribute with the field name and the filename of the real file::
+
+.. code-block:: json
+
+      {
+        "id": "another-file",
+        "@type": "File",
+        "title": "Another Test File",
+        "set_local_file": {"file": "file.png"}
+      }
+
+the deprecated form is also supported (it will create the file in the
+``file`` field)::
+
+.. code-block:: json
+
+      {
+        "id": "another-file",
+        "@type": "File",
+        "title": "Another Test File",
+        "set_local_file": "file.png"
+      }
+
 You can specify the ``base_path`` for the image in the ``create_item_runner``::
 
   create_item_runner(
