@@ -254,87 +254,113 @@ def create_item_runner(  # noqa
                 if data.get("set_dummy_image", False):
                     new_file = BytesIO()
                     generate_image().save(new_file, "png")
-                    if obj.portal_type == "Image":
-                        obj.setImage(Image("test.png", "test.png", new_file))
-                    else:
-                        obj.setFilename("test.png")
-                        obj.setFile(new_file)
-                        obj.setFormat("image/png")
+                    obj.setImage(Image("test.png", "test.png", new_file))
                 if data.get("set_local_image", False):
-                    image = open(
+                    new_file = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
-                    if obj.portal_type == "Image":
-                        obj.setImage(image.read())
-                    else:
-                        obj.setFilename(os.path.basename(data.get("set_local_image")))
-                        obj.setFile(image.read())
-                        obj.setFormat("image/png")
+                    obj.setImage(new_file.read())
+                if data.get("set_dummy_file", False):
+                    new_file = BytesIO()
+                    generate_image().save(new_file, "png")
+                    obj.setFilename("test.png")
+                    obj.setFile(new_file)
+                    obj.setFormat("image/png")
+                if data.get("set_local_file", False):
+                    new_file = open(
+                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
+                    )
+                    obj.setFilename(os.path.basename(data.get("set_local_image")))
+                    obj.setFile(the_file.read())
+                    obj.setFormat("image/png")
 
             if IDexterityContent.providedBy(obj):
                 if data.get("set_dummy_image", False) and isinstance(
                     data.get("set_dummy_image"), list
                 ):
-                    image = BytesIO()
-                    generate_image().save(image, "png")
-                    image = image if type(image) == str else image.getvalue()
+                    new_file = BytesIO()
+                    generate_image().save(new_file, "png")
+                    new_file = new_file if type(new_file) == str else new_file.getvalue()
                     for image_field in data["set_dummy_image"]:
-                        if obj.portal_type == "Image":
-                            setattr(
-                                obj,
-                                image_field,
-                                NamedBlobImage(data=image, contentType="image/png"),
-                            )
-                        else:
-                            setattr(
-                                obj,
-                                image_field,
-                                NamedBlobFile(data=image, contentType="image/png"),
-                            )
+                        setattr(
+                            obj,
+                            image_field,
+                            NamedBlobImage(data=new_file, contentType="image/png"),
+                        )
 
                 elif data.get("set_dummy_image", False) and isinstance(
                     data.get("set_dummy_image"), bool
                 ):
                     # Legacy behavior, set_dummy_image is a boolean
-                    if obj.portal_type == "Image":
-                        obj.image = NamedBlobImage(
-                            data=generate_image().tobytes(), contentType="image/png"
+                    obj.image = NamedBlobImage(
+                        data=generate_image().tobytes(), contentType="image/png"
+                    )
+
+                if data.get("set_dummy_file", False) and isinstance(
+                    data.get("set_dummy_file"), list
+                ):
+                    new_file = BytesIO()
+                    generate_image().save(new_file, "png")
+                    new_file = new_file if type(new_file) == str else new_file.getvalue()
+                    for image_field in data["set_dummy_file"]:
+                        setattr(
+                            obj,
+                            image_field,
+                            NamedBlobFile(data=new_file, contentType="image/png"),
                         )
-                    else:
-                        obj.file = NamedBlobFile(
-                            data=generate_image().tobytes(), contentType="image/png"
-                        )
+
+                elif data.get("set_dummy_file", False) and isinstance(
+                    data.get("set_dummy_file"), bool
+                ):
+                    # Legacy behavior, set_dummy_file is a boolean
+                    obj.file = NamedBlobFile(
+                        data=generate_image().tobytes(), contentType="image/png"
+                    )
 
                 if data.get("set_local_image", False) and isinstance(
                     data.get("set_local_image"), dict
                 ):
                     for image_data in data["set_local_image"].items():
-                        image = open(os.path.join(base_image_path, image_data[1]), "rb")
-                        if obj.portal_type == "Image":
-                            setattr(
-                                obj,
-                                image_data[0],
-                                NamedBlobImage(
-                                    data=image.read(), contentType="image/png"
-                                ),
-                            )
-                        else:
-                            setattr(
-                                obj,
-                                image_data[0],
-                                NamedBlobFile(
-                                    data=image.read(), contentType="image/png"
-                                ),
-                            )
+                        new_file = open(os.path.join(base_image_path, image_data[1]), "rb")
+                        setattr(
+                            obj,
+                            image_data[0],
+                            NamedBlobImage(
+                                data=new_file.read(), contentType="image/png"
+                            ),
+                        )
 
                 elif data.get("set_local_image", False) and isinstance(
                     data.get("set_local_image"), str
                 ):
-                    image = open(
+                    new_file = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
                     obj.image = NamedBlobImage(
-                        data=image.read(), contentType="image/png"
+                        data=new_file.read(), contentType="image/png"
+                    )
+
+                if data.get("set_local_file", False) and isinstance(
+                    data.get("set_local_file"), dict
+                ):
+                    for image_data in data["set_local_file"].items():
+                        new_file = open(os.path.join(base_image_path, image_data[1]), "rb")
+                        setattr(
+                            obj,
+                            image_data[0],
+                            NamedBlobFile(
+                                data=new_file.read(), contentType="image/png"
+                            ),
+                        )
+
+                elif data.get("set_local_file", False) and isinstance(
+                    data.get("set_local_file"), str
+                ):
+                    new_file = open(
+                        os.path.join(base_image_path, data.get("set_local_file")), "rb"
+                    )
+                    obj.file = NamedBlobFile(
+                        data=new_file.read(), contentType="image/png"
                     )
 
             deserializer(validate_all=True, data=data, create=True)

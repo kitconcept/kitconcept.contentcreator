@@ -1,0 +1,24 @@
+[{
+  "id": "an-file-deprecated",
+  "@type": "File",
+  "title": "Test File",
+  "set_dummy_file": true
+},
+{
+  "id": "another-file-deprecated",
+  "@type": "File",
+  "title": "Another Test File",
+  "set_local_file": "image.png"
+},
+{
+  "id": "an-file",
+  "@type": "File",
+  "title": "Test File",
+  "set_dummy_file": ["file"]
+},
+{
+  "id": "another-file",
+  "@type": "File",
+  "title": "Another Test File",
+  "set_local_file": {"file": "image.png"}
+}]
