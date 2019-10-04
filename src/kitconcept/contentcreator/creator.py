@@ -336,7 +336,7 @@ def create_item_runner(  # noqa
                     new_file = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
-                    obj.new_file = NamedBlobImage(
+                    obj.image = NamedBlobImage(
                         data=new_file.read(), contentType="image/png"
                     )
 
@@ -359,7 +359,7 @@ def create_item_runner(  # noqa
                     new_file = open(
                         os.path.join(base_image_path, data.get("set_local_file")), "rb"
                     )
-                    obj.new_file = NamedBlobFile(
+                    obj.file = NamedBlobFile(
                         data=new_file.read(), contentType="image/png"
                     )
 

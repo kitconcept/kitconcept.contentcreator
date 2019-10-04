@@ -52,7 +52,7 @@ class CreatorTestCase(unittest.TestCase):
             )
         self.assertIn("a-test-page-with-default-tiles", self.portal.objectIds())
         self.assertEqual(
-            3, len(self.portal["a-test-page-with-default-tiles"].tiles.items())
+            2, len(self.portal["a-test-page-with-default-tiles"].tiles.items())
         )  # noqa
 
     def test_image_fields(self):
@@ -140,4 +140,4 @@ class CreatorTestCase(unittest.TestCase):
                 default_wf_state="published",
             )
 
-        self.assertEquals(self.portal["a-folder"].description, "The description")
+        self.assertEqual(self.portal["a-folder"].description, "The description")
