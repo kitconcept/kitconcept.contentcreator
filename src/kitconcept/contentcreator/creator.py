@@ -280,7 +280,9 @@ def create_item_runner(  # noqa
                 ):
                     new_file = BytesIO()
                     generate_image().save(new_file, "png")
-                    new_file = new_file if type(new_file) == str else new_file.getvalue()
+                    new_file = (
+                        new_file if type(new_file) == str else new_file.getvalue()
+                    )
                     for image_field in data["set_dummy_image"]:
                         setattr(
                             obj,
@@ -301,7 +303,9 @@ def create_item_runner(  # noqa
                 ):
                     new_file = BytesIO()
                     generate_image().save(new_file, "png")
-                    new_file = new_file if type(new_file) == str else new_file.getvalue()
+                    new_file = (
+                        new_file if type(new_file) == str else new_file.getvalue()
+                    )
                     for image_field in data["set_dummy_file"]:
                         setattr(
                             obj,
@@ -321,7 +325,9 @@ def create_item_runner(  # noqa
                     data.get("set_local_image"), dict
                 ):
                     for image_data in data["set_local_image"].items():
-                        new_file = open(os.path.join(base_image_path, image_data[1]), "rb")
+                        new_file = open(
+                            os.path.join(base_image_path, image_data[1]), "rb"
+                        )
                         setattr(
                             obj,
                             image_data[0],
@@ -344,7 +350,9 @@ def create_item_runner(  # noqa
                     data.get("set_local_file"), dict
                 ):
                     for image_data in data["set_local_file"].items():
-                        new_file = open(os.path.join(base_image_path, image_data[1]), "rb")
+                        new_file = open(
+                            os.path.join(base_image_path, image_data[1]), "rb"
+                        )
                         setattr(
                             obj,
                             image_data[0],
