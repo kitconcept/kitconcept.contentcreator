@@ -14,19 +14,27 @@ pipeline {
   }
 
   stages {
-    stage('Git checkout') {
+    stage('Build') {
       steps {
         deleteDir()
         checkout scm
+        sh 'make'
       }
     }
-    stage('Build') {
+    stage('Code Analysis') {
       steps {
+        deleteDir()
+        checkout scm
         sh 'make'
+        sh 'make code-analysis'
+        sh 'bin/black  --check src/'
       }
     }
     stage('Test') {
       steps {
+        deleteDir()
+        checkout scm
+        sh 'make'
         sh 'make test'
       }
     }
