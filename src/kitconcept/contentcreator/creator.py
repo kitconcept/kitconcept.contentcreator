@@ -271,7 +271,7 @@ def create_item_runner(  # noqa
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
                     obj.setFilename(os.path.basename(data.get("set_local_image")))
-                    obj.setFile(the_file.read())
+                    obj.setFile(new_file.read())
                     obj.setFormat("image/png")
 
             if IDexterityContent.providedBy(obj):
