@@ -245,7 +245,11 @@ def create_item_runner(  # noqa
 
             # Populate default blocks if the content has the behavior enabled
             # And no blocks in the creation or in the existing object
-            if hasattr(obj, "blocks") and not data.get("blocks", False) and not obj.blocks:
+            if (
+                hasattr(obj, "blocks")
+                and not data.get("blocks", False)
+                and not obj.blocks
+            ):
                 obj.blocks = DEFAULT_BLOCKS
                 obj.blocks_layout = DEFAULT_BLOCKS_LAYOUT
 
