@@ -2,7 +2,7 @@
   "id": "a-test-page",
   "@type": "Document",
   "title": "Test Document",
-  "tiles": {
+  "blocks": {
       "078f8e69-1180-4233-b7c4-364472c491ce": {
           "@type": "title"
       },
@@ -24,7 +24,7 @@
           }
       }
   },
-  "tiles_layout": {
+  "blocks_layout": {
       "items": [
           "078f8e69-1180-4233-b7c4-364472c491ce",
           "27209e3b-fa93-4c69-915b-24650a1ac11c",
@@ -33,7 +33,7 @@
   }
 },
 {
-    "id": "a-test-page-with-default-tiles",
+    "id": "a-test-page-with-default-blocks",
     "@type": "Document",
     "title": "Test Document"
   }
