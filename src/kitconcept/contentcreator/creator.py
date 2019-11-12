@@ -19,6 +19,7 @@ from OFS.Image import Image
 
 import json
 import logging
+import magic
 import os
 import pkg_resources
 
@@ -253,6 +254,7 @@ def create_item_runner(  # noqa
                 obj.blocks = DEFAULT_BLOCKS
                 obj.blocks_layout = DEFAULT_BLOCKS_LAYOUT
 
+            get_file_type = magic.Magic(mime=True)
             # Populate image if any
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
@@ -332,11 +334,17 @@ def create_item_runner(  # noqa
                         new_file = open(
                             os.path.join(base_image_path, image_data[1]), "rb"
                         )
+                        # Get the correct content-type
+                        content_type = get_file_type.from_buffer(new_file.read())
+                        new_file.seek(0)
+
                         setattr(
                             obj,
                             image_data[0],
                             NamedBlobImage(
-                                data=new_file.read(), contentType="image/png"
+                                data=new_file.read(),
+                                filename=image_data[1],
+                                contentType=content_type,
                             ),
                         )
 
@@ -346,8 +354,14 @@ def create_item_runner(  # noqa
                     new_file = open(
                         os.path.join(base_image_path, data.get("set_local_image")), "rb"
                     )
+                    # Get the correct content-type
+                    content_type = get_file_type.from_buffer(new_file.read())
+                    new_file.seek(0)
+
                     obj.image = NamedBlobImage(
-                        data=new_file.read(), contentType="image/png"
+                        data=new_file.read(),
+                        filename=data.get("set_local_image"),
+                        contentType=content_type,
                     )
 
                 if data.get("set_local_file", False) and isinstance(
@@ -357,11 +371,17 @@ def create_item_runner(  # noqa
                         new_file = open(
                             os.path.join(base_image_path, image_data[1]), "rb"
                         )
+                        # Get the correct content-type
+                        content_type = get_file_type.from_buffer(new_file.read())
+                        new_file.seek(0)
+
                         setattr(
                             obj,
                             image_data[0],
                             NamedBlobFile(
-                                data=new_file.read(), contentType="image/png"
+                                data=new_file.read(),
+                                filename=image_data[1],
+                                contentType=content_type,
                             ),
                         )
 
@@ -371,8 +391,14 @@ def create_item_runner(  # noqa
                     new_file = open(
                         os.path.join(base_image_path, data.get("set_local_file")), "rb"
                     )
+                    # Get the correct content-type
+                    content_type = get_file_type.from_buffer(new_file.read())
+                    new_file.seek(0)
+
                     obj.file = NamedBlobFile(
-                        data=new_file.read(), contentType="image/png"
+                        data=new_file.read(),
+                        filename=data.get("set_local_file"),
+                        contentType=content_type,
                     )
 
             deserializer(validate_all=True, data=data, create=True)

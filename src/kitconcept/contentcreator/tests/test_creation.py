@@ -71,9 +71,13 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertIn("another-image", self.portal.objectIds())
         self.assertTrue(self.portal["another-image"].image)
+        self.assertTrue(self.portal["another-image"].image.filename, "image.png")
+        self.assertTrue(self.portal["another-image"].image.contentType, "image/png")
 
         self.assertIn("news-item-image", self.portal.objectIds())
         self.assertTrue(self.portal["news-item-image"].image)
+        self.assertTrue(self.portal["news-item-image"].image.filename, "image.png")
+        self.assertTrue(self.portal["news-item-image"].image.contentType, "image/png")
 
     def test_file_fields(self):
         content_structure = load_json("fields_file.json", __file__)
@@ -86,11 +90,13 @@ class CreatorTestCase(unittest.TestCase):
                 default_wf_state="published",
                 base_image_path=os.path.dirname(__file__),
             )
-        self.assertIn("an-file", self.portal.objectIds())
-        self.assertTrue(self.portal["an-file"].file)
+        self.assertIn("a-file", self.portal.objectIds())
+        self.assertTrue(self.portal["a-file"].file)
 
         self.assertIn("another-file", self.portal.objectIds())
         self.assertTrue(self.portal["another-file"].file)
+        self.assertTrue(self.portal["another-file"].file.filename, "report.pdf")
+        self.assertTrue(self.portal["another-file"].file.contentType, "application/pdf")
 
     def test_image_fields_deprecated(self):
         content_structure = load_json("fields_image.json", __file__)
@@ -108,6 +114,12 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertIn("another-image-deprecated", self.portal.objectIds())
         self.assertTrue(self.portal["another-image-deprecated"].image)
+        self.assertTrue(
+            self.portal["another-image-deprecated"].image.filename, "image.png"
+        )
+        self.assertTrue(
+            self.portal["another-image-deprecated"].image.contentType, "image/png"
+        )
 
     def test_file_fields_deprecated(self):
         content_structure = load_json("fields_file.json", __file__)
@@ -120,11 +132,13 @@ class CreatorTestCase(unittest.TestCase):
                 default_wf_state="published",
                 base_image_path=os.path.dirname(__file__),
             )
-        self.assertIn("an-file-deprecated", self.portal.objectIds())
-        self.assertTrue(self.portal["an-file-deprecated"].file)
+        self.assertIn("a-file-deprecated", self.portal.objectIds())
+        self.assertTrue(self.portal["a-file-deprecated"].file)
 
         self.assertIn("another-file-deprecated", self.portal.objectIds())
         self.assertTrue(self.portal["another-file-deprecated"].file)
+        self.assertTrue(self.portal["another-file"].file.filename, "report.pdf")
+        self.assertTrue(self.portal["another-file"].file.contentType, "application/pdf")
 
     def test_edit_if_content_already_exists(self):
         content_structure = load_json("test_content.json", __file__)

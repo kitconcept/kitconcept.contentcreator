@@ -1,5 +1,5 @@
 [{
-  "id": "an-file-deprecated",
+  "id": "a-file-deprecated",
   "@type": "File",
   "title": "Test File",
   "set_dummy_file": true
@@ -8,10 +8,10 @@
   "id": "another-file-deprecated",
   "@type": "File",
   "title": "Another Test File",
-  "set_local_file": "image.png"
+  "set_local_file": "report.pdf"
 },
 {
-  "id": "an-file",
+  "id": "a-file",
   "@type": "File",
   "title": "Test File",
   "set_dummy_file": ["file"]
@@ -20,5 +20,5 @@
   "id": "another-file",
   "@type": "File",
   "title": "Another Test File",
-  "set_local_file": {"file": "image.png"}
+  "set_local_file": {"file": "report.pdf"}
 }]
