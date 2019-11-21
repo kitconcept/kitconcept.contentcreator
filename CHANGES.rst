@@ -4,7 +4,8 @@ Changelog
 1.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Re-release.
+  [timo]
 
 
 1.0.3 (2019-05-06)
