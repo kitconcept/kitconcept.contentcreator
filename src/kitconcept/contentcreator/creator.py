@@ -479,8 +479,8 @@ def create_item_runner(  # noqa
                 obj.manage_setLocalRoles(user, roles)
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
-            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}") exception: {3}'  # noqa
-            logger.error(message.format(type_, container_path, id_, e.args[0]))
+            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'  # noqa
+            logger.error(message.format(type_, container_path, id_, obj.title, e))
             continue
 
         # Call recursively

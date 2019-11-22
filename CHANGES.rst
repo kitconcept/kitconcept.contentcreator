@@ -4,7 +4,8 @@ Changelog
 1.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Improve error reporting in create_item_runner.
+  [timo]
 
 
 1.0.4 (2019-11-21)
