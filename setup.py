@@ -16,7 +16,7 @@ long_description = "\n\n".join(
 
 setup(
     name="kitconcept.contentcreator",
-    version="1.0.5",
+    version="1.0.6.dev0",
     description="",
     long_description=long_description,
     # Get more from https://pypi.python.org/pypi?%3Aaction=list_classifiers
