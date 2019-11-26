@@ -6,6 +6,7 @@
 *.py?
 *.swp
 .Python
+pyvenv.cfg
 # dirs
 bin/
 buildout-cache/
