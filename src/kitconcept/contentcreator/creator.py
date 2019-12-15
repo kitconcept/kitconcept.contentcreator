@@ -23,7 +23,6 @@ import magic
 import os
 import pkg_resources
 
-
 try:
     pkg_resources.get_distribution("Products.Archetypes")
     from Products.Archetypes.interfaces import IBaseObject
@@ -220,7 +219,14 @@ def create_item_runner(  # noqa
             create_object = False
         else:
             # if don't we create it
-            obj = create(container, type_, id_=id_, title=title)
+            try:
+                obj = create(container, type_, id_=id_, title=title)
+            except:  # noqa
+                import sys
+                import pdb
+                for attr in ('stdin', 'stdout', 'stderr'):
+                    setattr(sys, attr, getattr(sys, '__%s__' % attr))
+                pdb.set_trace()
             create_object = True
 
         try:
