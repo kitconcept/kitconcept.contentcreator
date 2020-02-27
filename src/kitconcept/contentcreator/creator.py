@@ -464,8 +464,8 @@ def create_item_runner(  # noqa
                         )  # noqa
                     if immediately_allowed_types:
                         be.setImmediatelyAddableTypes = (
-                            immediately_allowed_types
-                        )  # noqa
+                            immediately_allowed_types  # noqa
+                        )
                         logger.warn(
                             "{0}: immediately_allowed_types {1}".format(
                                 path, immediately_allowed_types
@@ -493,3 +493,50 @@ def create_item_runner(  # noqa
             logger=logger,
             base_image_path=base_image_path,
         )
+
+
+def content_creator_from_folder(folder_name, temp_enable_content_types):
+    """ Creates content from the files given a folder name
+
+    The path and id are determined by the name of the file like in
+
+    de.beispiele.bildergroessen.json
+
+    The file is a p.restapi JSON syntax. This method reads all the files and kick the
+    runner in for process them.
+
+    """
+    # enable content non-globally addable types just for initial content
+    # creation
+    portal = api.portal.get()
+    for content_type in temp_enable_content_types:
+        enable_content_type(portal, content_type)
+
+    folder = os.path.join(os.path.dirname(__file__), folder_name)
+    # Get files in the right order
+    files = sorted(os.listdir(folder), key=lambda x: (len(x), x.lower()))
+    for file_ in files:
+        # ex.: file_ = 'de.ueber-uns.json'
+        filepath = os.path.join(folder, file_)
+        # ex.: path = '/de'
+        splitted_path = os.path.splitext(file_)[0].split(".")
+        path = "/" + "/".join(splitted_path[:-1])
+        container = api.content.get(path=path)
+        if container is None:
+            container = create_object(path)
+        try:
+            with open(filepath, "r") as f:
+                data = json.load(f)
+            data["id"] = splitted_path[-1]
+            create_item_runner(
+                container,
+                [data],
+                default_lang="de",
+                default_wf_state="published",
+                base_image_path=os.path.join(os.path.dirname(__file__), "example"),
+            )
+        except ValueError:
+            logger.error('Error in file structure: "{0}"'.format(filepath))
+
+    for content_type in temp_enable_content_types:
+        disable_content_type(portal, content_type)
