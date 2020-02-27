@@ -559,7 +559,8 @@ def content_creator_from_folder(
     # Get files in the right order
     files = sorted(os.listdir(folder), key=lambda x: (len(x), x.lower()))
     for file_ in files:
-        # If a content.json is found, proceed as if it contains a normal json arrayed structure
+        # If a content.json is found, proceed as if it contains a normal json arrayed
+        # structure
         if file_ == "content.json":
             content_structure = load_json(os.path.join(folder, "content.json"))
             create_item_runner(
