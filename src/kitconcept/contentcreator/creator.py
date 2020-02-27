@@ -2,20 +2,21 @@
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from kitconcept.contentcreator.dummy_image import generate_image
+from OFS.Image import Image
 from plone import api
 from plone.app.dexterity import behaviors
 from plone.dexterity.interfaces import IDexterityContent
-from plone.namedfile.file import NamedBlobImage
 from plone.namedfile.file import NamedBlobFile
+from plone.namedfile.file import NamedBlobImage
 from plone.portlets.interfaces import IPortletAssignmentSettings
+from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
+from six import BytesIO
 from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
 from zope.lifecycleevent import ObjectCreatedEvent
-from six import BytesIO
-from OFS.Image import Image
 
 import json
 import logging
@@ -138,6 +139,40 @@ def set_exclude_from_nav(obj):
         obj.exclude_from_nav = True
     finally:
         obj.reindexObject(idxs=["exclude_from_nav"])
+
+
+def disable_content_type(portal, fti_id):
+    portal_types = getToolByName(portal, "portal_types")
+    document_fti = getattr(portal_types, fti_id)
+    document_fti.global_allow = False
+
+
+def enable_content_type(portal, fti_id):
+    portal_types = getToolByName(portal, "portal_types")
+    document_fti = getattr(portal_types, fti_id)
+    document_fti.global_allow = True
+
+
+def create_object(path, is_folder=False):
+    """ Recursively create object and folder structure if necessary
+    """
+    obj = api.content.get(path=path)
+    if obj is not None:
+        return obj
+
+    path_parent, obj_id = path.rsplit("/", 1)
+    if path_parent == "":
+        parent = api.portal.get()
+    else:
+        parent = create_object(path_parent, is_folder=True)
+
+    logger.info('Creating "{0}"'.format(path))
+
+    obj = api.content.create(
+        container=parent, type="Folder" if is_folder else "Document", id=obj_id
+    )
+    api.content.transition(obj=obj, transition="publish")
+    return obj
 
 
 def create_item_runner(  # noqa
@@ -495,7 +530,15 @@ def create_item_runner(  # noqa
         )
 
 
-def content_creator_from_folder(folder_name, temp_enable_content_types):
+def content_creator_from_folder(
+    folder_name,
+    base_image_path=os.path.dirname(__file__),
+    default_lang=None,
+    default_wf_state=None,
+    ignore_wf_types=["Image", "File"],
+    logger=logger,
+    temp_enable_content_types=[],
+):
     """ Creates content from the files given a folder name
 
     The path and id are determined by the name of the file like in
@@ -516,6 +559,19 @@ def content_creator_from_folder(folder_name, temp_enable_content_types):
     # Get files in the right order
     files = sorted(os.listdir(folder), key=lambda x: (len(x), x.lower()))
     for file_ in files:
+        # If a content.json is found, proceed as if it contains a normal json arrayed structure
+        if file_ == "content.json":
+            content_structure = load_json(os.path.join(folder, "content.json"))
+            create_item_runner(
+                api.portal.get(),
+                content_structure,
+                default_lang=default_lang,
+                default_wf_state=default_wf_state,
+                ignore_wf_types=ignore_wf_types,
+                logger=logger,
+                base_image_path=base_image_path,
+            )
+            continue
         # ex.: file_ = 'de.ueber-uns.json'
         filepath = os.path.join(folder, file_)
         # ex.: path = '/de'
@@ -531,9 +587,11 @@ def content_creator_from_folder(folder_name, temp_enable_content_types):
             create_item_runner(
                 container,
                 [data],
-                default_lang="de",
-                default_wf_state="published",
-                base_image_path=os.path.join(os.path.dirname(__file__), "example"),
+                default_lang=default_lang,
+                default_wf_state=default_wf_state,
+                ignore_wf_types=ignore_wf_types,
+                logger=logger,
+                base_image_path=base_image_path,
             )
         except ValueError:
             logger.error('Error in file structure: "{0}"'.format(filepath))

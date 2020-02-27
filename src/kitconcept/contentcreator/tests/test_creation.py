@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from kitconcept.contentcreator.creator import create_item_runner
+from kitconcept.contentcreator.creator import content_creator_from_folder
 from kitconcept.contentcreator.creator import load_json
 from kitconcept.contentcreator.testing import (
     CONTENTCREATOR_CORE_INTEGRATION_TESTING,
@@ -155,3 +156,12 @@ class CreatorTestCase(unittest.TestCase):
             )
 
         self.assertEqual(self.portal["a-folder"].description, "The description")
+
+    def test_content_from_folder(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(path)
+
+        self.assertIn("a-folder", self.portal)
+        self.assertIn("a-document", self.portal["a-folder"])
