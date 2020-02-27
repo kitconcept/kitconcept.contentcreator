@@ -4,7 +4,8 @@ Changelog
 1.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added the from a folder content creation.
+  [sneridagh]
 
 
 1.0.5 (2019-11-22)
