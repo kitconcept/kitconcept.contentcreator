@@ -18,16 +18,20 @@ This package is the responsible for automated content creation via
 plone.restapi serializers/creators.
 
 Usage
------
+=====
 
-You create new content from a plone.restapi syntax compliant JSON file. You can
-load it using the method: ``load_json``::
+Creator runner given a single file
+----------------------------------
+
+Given a JSON file containing an array of objects to be created, this runner takes this
+array content (should have plone.restapi syntax compliant structure) and creates content
+out of it. You can load it using the method: ``load_json``::
 
   from kitconcept.contentcreator.creator import load_json
 
   content_structure = load_json('testcontent/content.json', __file__)
 
-Then you can call the method ``create_item_runner``::
+Then you can call the runner with the method ``create_item_runner``::
 
   from kitconcept.contentcreator.creator import create_item_runner
 
@@ -37,6 +41,16 @@ Then you can call the method ``create_item_runner``::
       default_lang='en',
       default_wf_state='published'
   )
+
+Creator runner given a folder with multiple files
+-------------------------------------------------
+
+Each file should contain a single p.restapi JSON compliant object (non arrayed, can't
+contain other objects). It takes the placement in the tree hierarchy and the object id
+from the filename name (eg. de.beispiele.bildergroessen.json)
+
+Setup runners from external modules/packages
+--------------------------------------------
 
 Alternativelly, you can create custom content creators in other packages and
 call them all at the same time, via a custom adapter::
