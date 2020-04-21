@@ -9,6 +9,7 @@ from plone import api
 from plone.app.testing import applyProfile
 
 import os
+import sys
 import unittest
 
 
@@ -163,5 +164,40 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(path)
 
-        self.assertIn("a-folder", self.portal)
-        self.assertIn("a-document", self.portal["a-folder"])
+        self.assertEqual(
+            ['front-page', 'a-folder'],
+            self.portal.contentIds(),
+        )
+        self.assertEqual(
+            ['a-document-1', 'a-document-2'],
+            self.portal["a-folder"].contentIds(),
+        )
+
+    def test_content_from_folder_custom_order(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+
+        def custom_order(item):
+            custom_order = [
+                "a-folder.a-document-2.json",
+                "a-folder.a-document-1.json",
+            ]
+            return (
+                len(item),  # First folders (lower string size)
+                custom_order.index(item) if item in custom_order else sys.maxsize,  # Custom order
+                item.lower(),  # Than alphabetically
+            )
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(
+                folder_name=path,
+                sort_key=custom_order,
+            )
+
+        self.assertEqual(
+            ['front-page', 'a-folder'],
+            self.portal.contentIds(),
+        )
+        self.assertEqual(
+            ['a-document-2', 'a-document-1'],
+            self.portal["a-folder"].contentIds(),
+        )

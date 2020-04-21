@@ -560,10 +560,10 @@ def content_creator_from_folder(
 
     # Get files in the right order
     if sort_key is None:
-        def sort_key(x):
+        def sort_key(item):
             return (
-                len(x),  # First folders (lower string size)
-                x.lower(),  # Than alphabetically
+                len(item),  # First folders (lower string size)
+                item.lower(),  # Than alphabetically
             )
     files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
