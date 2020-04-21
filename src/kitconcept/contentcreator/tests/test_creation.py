@@ -165,7 +165,7 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
-            ["a-document-1", "a-document-2"], self.portal["a-folder"].contentIds()
+            ["a-document-1", "a-document-2", "a-document-3", "the-last-document"], self.portal["a-folder"].contentIds()
         )
 
     def test_content_from_folder_custom_order(self):
@@ -177,10 +177,12 @@ class CreatorTestCase(unittest.TestCase):
                 custom_order=[
                     "a-folder.a-document-2.json",
                     "a-folder.a-document-1.json",
+                    "a-folder.a-document-3.json",
+                    "a-folder.the-last-document.json",
                 ],
             )
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
-            ["a-document-2", "a-document-1"], self.portal["a-folder"].contentIds()
+            ["a-document-2", "a-document-1", "a-document-3", "the-last-document"], self.portal["a-folder"].contentIds()
         )

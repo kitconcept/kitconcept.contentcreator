@@ -13,6 +13,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
 from six import BytesIO
+from six import MAXSIZE
 from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
@@ -23,7 +24,6 @@ import logging
 import magic
 import os
 import pkg_resources
-import sys
 
 
 try:
@@ -565,7 +565,7 @@ def content_creator_from_folder(
             len(item.split(".")[:-1]),  # First folders
             custom_order.index(item)
             if item in custom_order
-            else sys.maxsize,  # Custom order
+            else MAXSIZE,  # Custom order
             item.lower(),  # Than alphabetically
         )
 
