@@ -538,6 +538,7 @@ def content_creator_from_folder(
     ignore_wf_types=["Image", "File"],
     logger=logger,
     temp_enable_content_types=[],
+    sort_key=None,
 ):
     """ Creates content from the files given a folder name
 
@@ -557,7 +558,9 @@ def content_creator_from_folder(
 
     folder = os.path.join(os.path.dirname(__file__), folder_name)
     # Get files in the right order
-    files = sorted(os.listdir(folder), key=lambda x: (len(x), x.lower()))
+    if sort_key is None:
+        sort_key = lambda x: (len(x), x.lower())
+    files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
         # structure
