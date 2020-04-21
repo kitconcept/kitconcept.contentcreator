@@ -557,9 +557,14 @@ def content_creator_from_folder(
         enable_content_type(portal, content_type)
 
     folder = os.path.join(os.path.dirname(__file__), folder_name)
+
     # Get files in the right order
     if sort_key is None:
-        sort_key = lambda x: (len(x), x.lower())
+        def sort_key(x):
+            return (
+                len(x),  # First folders (lower string size)
+                x.lower(),  # Than alphabetically
+            )
     files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
