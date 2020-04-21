@@ -163,5 +163,26 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(path)
 
-        self.assertIn("a-folder", self.portal)
-        self.assertIn("a-document", self.portal["a-folder"])
+        self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
+        self.assertEqual(
+            ["a-document-1", "a-document-2", "a-document-3", "the-last-document"],
+            self.portal["a-folder"].contentIds(),
+        )
+
+    def test_content_from_folder_custom_order(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(
+                folder_name=path,
+                custom_order=[
+                    "a-folder.a-document-2.json",
+                    "a-folder.a-document-1.json",
+                ],
+            )
+
+        self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
+        self.assertEqual(
+            ["a-document-2", "a-document-1", "a-document-3", "the-last-document"],
+            self.portal["a-folder"].contentIds(),
+        )

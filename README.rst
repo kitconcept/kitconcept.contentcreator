@@ -90,6 +90,35 @@ this should be the declaration in the other package::
               ],
           )
 
+other common use is calling from a folder::
+
+  from kitconcept.contentcreator.creator import content_creator_from_folder
+
+
+  content_creator_from_folder(
+      folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
+      base_image_path=os.path.join(os.path.dirname(__file__), "images"),
+      default_lang='en',
+      default_wf_state='published',
+      ignore_wf_types=[
+          'FormBooleanField',
+          'FormDateField',
+          'FormFileField',
+          'FormFixedPointField',
+          'FormIntegerField',
+          'FormLabelField',
+          'FormLinesField',
+          'FormPasswordField',
+      ],
+      logger=logger,
+      temp_enable_content_types=[],
+      custom_order=[
+        'object-id-2.json',
+        'object-id-3.json',
+        'object-id-1.json',
+      ],
+  )
+
 Images
 ------
 

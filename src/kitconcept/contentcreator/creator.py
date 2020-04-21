@@ -13,6 +13,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
 from six import BytesIO
+from six import MAXSIZE
 from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
@@ -538,6 +539,7 @@ def content_creator_from_folder(
     ignore_wf_types=["Image", "File"],
     logger=logger,
     temp_enable_content_types=[],
+    custom_order=[],
 ):
     """ Creates content from the files given a folder name
 
@@ -556,8 +558,18 @@ def content_creator_from_folder(
         enable_content_type(portal, content_type)
 
     folder = os.path.join(os.path.dirname(__file__), folder_name)
+
     # Get files in the right order
-    files = sorted(os.listdir(folder), key=lambda x: (len(x), x.lower()))
+    def sort_key(item):
+        return (
+            len(item.split(".")[:-1]),  # First folders
+            custom_order.index(item)
+            if item in custom_order
+            else MAXSIZE,  # Custom order
+            item.lower(),  # Than alphabetically
+        )
+
+    files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
         # structure
