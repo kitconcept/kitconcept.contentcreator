@@ -23,6 +23,7 @@ import logging
 import magic
 import os
 import pkg_resources
+import sys
 
 
 try:
@@ -538,7 +539,7 @@ def content_creator_from_folder(
     ignore_wf_types=["Image", "File"],
     logger=logger,
     temp_enable_content_types=[],
-    sort_key=None,
+    custom_order=[],
 ):
     """ Creates content from the files given a folder name
 
@@ -559,13 +560,14 @@ def content_creator_from_folder(
     folder = os.path.join(os.path.dirname(__file__), folder_name)
 
     # Get files in the right order
-    if sort_key is None:
-
-        def sort_key(item):
-            return (
-                len(item),  # First folders (lower string size)
-                item.lower(),  # Than alphabetically
-            )
+    def sort_key(item):
+        return (
+            len(item.split('.')[:-1]),  # First folders
+            custom_order.index(item)
+            if item in custom_order
+            else sys.maxsize,  # Custom order
+            item.lower(),  # Than alphabetically
+        )
 
     files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
