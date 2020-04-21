@@ -178,8 +178,6 @@ class CreatorTestCase(unittest.TestCase):
                 custom_order=[
                     "a-folder.a-document-2.json",
                     "a-folder.a-document-1.json",
-                    "a-folder.a-document-3.json",
-                    "a-folder.the-last-document.json",
                 ],
             )
 
