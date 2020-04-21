@@ -562,7 +562,7 @@ def content_creator_from_folder(
     # Get files in the right order
     def sort_key(item):
         return (
-            len(item.split('.')[:-1]),  # First folders
+            len(item.split(".")[:-1]),  # First folders
             custom_order.index(item)
             if item in custom_order
             else sys.maxsize,  # Custom order
