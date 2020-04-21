@@ -560,11 +560,13 @@ def content_creator_from_folder(
 
     # Get files in the right order
     if sort_key is None:
+
         def sort_key(item):
             return (
                 len(item),  # First folders (lower string size)
                 item.lower(),  # Than alphabetically
             )
+
     files = sorted(os.listdir(folder), key=sort_key)
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed

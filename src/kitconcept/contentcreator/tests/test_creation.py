@@ -165,12 +165,10 @@ class CreatorTestCase(unittest.TestCase):
             content_creator_from_folder(path)
 
         self.assertEqual(
-            ['front-page', 'a-folder'],
-            self.portal.contentIds(),
+            ["front-page", "a-folder"], self.portal.contentIds(),
         )
         self.assertEqual(
-            ['a-document-1', 'a-document-2'],
-            self.portal["a-folder"].contentIds(),
+            ["a-document-1", "a-document-2"], self.portal["a-folder"].contentIds(),
         )
 
     def test_content_from_folder_custom_order(self):
@@ -183,21 +181,20 @@ class CreatorTestCase(unittest.TestCase):
             ]
             return (
                 len(item),  # First folders (lower string size)
-                custom_order.index(item) if item in custom_order else sys.maxsize,  # Custom order
+                custom_order.index(item)
+                if item in custom_order
+                else sys.maxsize,  # Custom order
                 item.lower(),  # Than alphabetically
             )
 
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(
-                folder_name=path,
-                sort_key=custom_order,
+                folder_name=path, sort_key=custom_order,
             )
 
         self.assertEqual(
-            ['front-page', 'a-folder'],
-            self.portal.contentIds(),
+            ["front-page", "a-folder"], self.portal.contentIds(),
         )
         self.assertEqual(
-            ['a-document-2', 'a-document-1'],
-            self.portal["a-folder"].contentIds(),
+            ["a-document-2", "a-document-1"], self.portal["a-folder"].contentIds(),
         )
