@@ -113,9 +113,9 @@ other common use is calling from a folder::
       logger=logger,
       temp_enable_content_types=[],
       custom_order=[
-        'object-id-2',
-        'object-id-3',
-        'object-id-1',
+        'object-id-2.json',
+        'object-id-3.json',
+        'object-id-1.json',
       ],
   )
 
