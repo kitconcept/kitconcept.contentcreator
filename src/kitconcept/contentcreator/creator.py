@@ -46,7 +46,7 @@ except pkg_resources.DistributionNotFound:  # pragma: no restapi
     PRESTAPI_PRESENT = False
 
 
-logger = logging.getLogger("collective.contentcreator")
+logger = logging.getLogger("kitconcept.contentcreator")
 
 # Removing description block from the creator, bring it back parameterized if
 # required
