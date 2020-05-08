@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.6 (unreleased)
+1.0.6 (2020-05-08)
 ------------------
 
 - Publish package on pypi.
