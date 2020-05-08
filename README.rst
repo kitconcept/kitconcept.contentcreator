@@ -11,8 +11,8 @@ kitconcept.contentcreator
    :target: https://kitconcept.com/
 
 
-.. image:: https://secure.travis-ci.org/collective/kitconcept.contentcreator.png
-    :target: http://travis-ci.org/collective/kitconcept.contentcreator
+.. image:: https://secure.travis-ci.org/kitconcept/kitconcept.contentcreator.png
+    :target: http://travis-ci.org/kitconcept/kitconcept.contentcreator
 
 This package is the responsible for automated content creation via
 plone.restapi serializers/creators.

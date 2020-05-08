@@ -11,6 +11,7 @@ pyvenv.cfg
 bin/
 buildout-cache/
 develop-eggs/
+dist/
 eggs/
 htmlcov/
 include/
