@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-version = 3.7
+version = 3
 
 # We like colors
 # From: https://coderwall.com/p/izxssa/colored-makefile-for-golang-projects
@@ -71,6 +71,12 @@ build-plone-5.2: .installed.cfg  ## Build Plone 5.2
 	bin/pip install -r requirements.txt
 	bin/buildout -c plone-5.2.x.cfg
 
+.PHONY: Build Plone 5.2 Performance
+build-plone-5.2-performance: .installed.cfg  ## Build Plone 5.2
+	bin/pip install --upgrade pip
+	bin/pip install -r requirements.txt
+	bin/buildout -c plone-5.2.x-performance.cfg
+
 .PHONY: Test
 test:  ## Test
 	bin/test
@@ -82,7 +88,12 @@ test-performance:
 .PHONY: Code Analysis
 code-analysis:  ## Code Analysis
 	bin/code-analysis
-	bin/black src/
+	if [ -f "bin/black" ]; then bin/black src/ --check ; fi
+
+.PHONY: Black
+black:  ## Black
+	bin/code-analysis
+	if [ -f "bin/black" ]; then bin/black src/ ; fi
 
 .PHONY: Build Docs
 docs:  ## Build Docs
