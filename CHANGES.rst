@@ -4,6 +4,9 @@ Changelog
 1.0.6 (unreleased)
 ------------------
 
+- Publish package on pypi.
+  [timo]
+
 - Added the from a folder content creation.
   [sneridagh]
 
