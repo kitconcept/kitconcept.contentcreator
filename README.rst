@@ -94,7 +94,6 @@ other common use is calling from a folder::
 
   from kitconcept.contentcreator.creator import content_creator_from_folder
 
-
   content_creator_from_folder(
       folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
       base_image_path=os.path.join(os.path.dirname(__file__), "images"),
@@ -256,8 +255,8 @@ Development
 
 Requirements:
 
-- Python 3/2.7
-- Virtualenv
+- Python 3
+- venv
 
 Setup::
 

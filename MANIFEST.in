@@ -1,4 +1,6 @@
 graft src/kitconcept/contentcreator
 graft docs
 include *.rst
+global-exclude Makefile
+global-exclude requirements.txt
 global-exclude *.pyc
