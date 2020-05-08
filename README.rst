@@ -147,8 +147,6 @@ Alternativelly, you can provide the image an extra property ``set_dummy_image``
 with an array of (image) field names that will create a dummy image placeholder
 in the specified fields in the to be created content type::
 
-.. code-block:: json
-
       {
         "id": "an-image",
         "@type": "Image",
@@ -158,8 +156,6 @@ in the specified fields in the to be created content type::
 
 the deprecated form is also supported (it will create the image in the
 ``image`` field)::
-
-.. code-block:: json
 
       {
         "id": "an-image",
@@ -171,8 +167,6 @@ the deprecated form is also supported (it will create the image in the
 You can specify a real image too, using a dict in the ``set_local_image`` JSON
 attribute with the field name and the filename of the real image::
 
-.. code-block:: json
-
       {
         "id": "another-image",
         "@type": "Image",
@@ -183,8 +177,6 @@ attribute with the field name and the filename of the real image::
 the deprecated form is also supported (it will create the image in the
 ``image`` field)::
 
-.. code-block:: json
-
       {
         "id": "another-image",
         "@type": "Image",
@@ -193,8 +185,6 @@ the deprecated form is also supported (it will create the image in the
       }
 
 the same happen with files::
-
-.. code-block:: json
 
       {
         "id": "an-file",
@@ -206,8 +196,6 @@ the same happen with files::
 the deprecated form is also supported (it will create the file in the
 ``file`` field)::
 
-.. code-block:: json
-
       {
         "id": "an-file",
         "@type": "File",
@@ -218,8 +206,6 @@ the deprecated form is also supported (it will create the file in the
 You can specify a real file too, using a dict in the ``set_local_file`` JSON
 attribute with the field name and the filename of the real file::
 
-.. code-block:: json
-
       {
         "id": "another-file",
         "@type": "File",
@@ -229,8 +215,6 @@ attribute with the field name and the filename of the real file::
 
 the deprecated form is also supported (it will create the file in the
 ``file`` field)::
-
-.. code-block:: json
 
       {
         "id": "another-file",
