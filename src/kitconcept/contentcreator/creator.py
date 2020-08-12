@@ -513,6 +513,10 @@ def create_item_runner(  # noqa
             # create local roles
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
+
+            # reindex object
+            obj.reindexObject()
+
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
             message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'  # noqa
