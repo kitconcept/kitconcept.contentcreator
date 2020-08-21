@@ -256,7 +256,16 @@ def create_item_runner(  # noqa
             create_object = False
         else:
             # if don't we create it
-            obj = create(container, type_, id_=id_, title=title)
+            try:
+                obj = create(container, type_, id_=id_, title=title)
+            except:
+                logger.warn(
+                    "Can not create object {} ({}) in {}".format(
+                        id_,
+                        type_,
+                        "/".join(container.getPhysicalPath())
+                    )
+                )
             create_object = True
 
         try:
@@ -519,8 +528,8 @@ def create_item_runner(  # noqa
 
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
-            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'  # noqa
-            logger.error(message.format(type_, container_path, id_, obj.title, e))
+            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'
+            logger.error(message.format(type_, container_path, id_, title, e))
             continue
 
         # Call recursively
