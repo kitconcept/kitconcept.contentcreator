@@ -261,9 +261,7 @@ def create_item_runner(  # noqa
             except:
                 logger.warn(
                     "Can not create object {} ({}) in {}".format(
-                        id_,
-                        type_,
-                        "/".join(container.getPhysicalPath())
+                        id_, type_, "/".join(container.getPhysicalPath())
                     )
                 )
             create_object = True
