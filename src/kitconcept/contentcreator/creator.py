@@ -258,7 +258,7 @@ def create_item_runner(  # noqa
             # if don't we create it
             try:
                 obj = create(container, type_, id_=id_, title=title)
-            except: # noqa
+            except:  # noqa
                 logger.warn(
                     "Can not create object {} ({}) in {}".format(
                         id_, type_, "/".join(container.getPhysicalPath())
