@@ -155,8 +155,7 @@ def enable_content_type(portal, fti_id):
 
 
 def create_object(path, is_folder=False):
-    """ Recursively create object and folder structure if necessary
-    """
+    """Recursively create object and folder structure if necessary"""
     obj = api.content.get(path=path)
     if obj is not None:
         return obj
@@ -552,7 +551,7 @@ def content_creator_from_folder(
     temp_enable_content_types=[],
     custom_order=[],
 ):
-    """ Creates content from the files given a folder name
+    """Creates content from the files given a folder name
 
     The path and id are determined by the name of the file like in
 
