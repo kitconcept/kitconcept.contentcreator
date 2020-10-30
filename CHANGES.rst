@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.0.6 (unreleased)
+------------------
+
+- Improve content language detection if the field is not present
+  [sneridagh]
+
 1.0.6 (2020-05-08)
 ------------------
 
