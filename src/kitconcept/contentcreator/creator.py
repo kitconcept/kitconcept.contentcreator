@@ -45,6 +45,10 @@ try:
 except pkg_resources.DistributionNotFound:  # pragma: no restapi
     PRESTAPI_PRESENT = False
 
+try:
+    from Products.CMFPlone.utils import get_installer
+except ImportError:
+    get_installer = None
 
 logger = logging.getLogger("kitconcept.contentcreator")
 
@@ -154,6 +158,12 @@ def enable_content_type(portal, fti_id):
     document_fti.global_allow = True
 
 
+def get_lang_from_lrf(container, langs):
+    for segment in container.getPhysicalPath():
+        if segment in langs:
+            return segment
+
+
 def create_object(path, is_folder=False):
     """Recursively create object and folder structure if necessary"""
     obj = api.content.get(path=path)
@@ -228,6 +238,7 @@ def create_item_runner(  # noqa
     """
 
     request = getRequest()
+    portal = api.portal.get()
 
     for data in content_structure:
         type_ = data.get("@type", None)
@@ -281,7 +292,23 @@ def create_item_runner(  # noqa
 
             # defaults
             if not data.get("language"):
-                data["language"] = default_lang
+                language_tool = api.portal.get_tool("portal_languages")
+                supported_langs = language_tool.getSupportedLanguages()
+
+                if get_installer:
+                    installer = get_installer(portal, request)
+                else:
+                    installer = api.portal.get_tool("portal_quickinstaller")
+
+                if (
+                    installer.isProductInstalled("plone.app.multilingual")
+                    and len(supported_langs) > 1
+                ):
+                    # Get language from path and set it
+                    data["language"] = get_lang_from_lrf(container, supported_langs)
+
+                else:
+                    data["language"] = default_lang
 
             if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
                 data["review_state"] = default_wf_state
