@@ -23,21 +23,21 @@ Usage
 Basic
 -----
 
-It allows to have a structure in your policy package like:
+It allows to have a structure in your policy package like::
 
-    |-content_creator
-        |- content.json
-        |- siteroot.json
-        |- de.mysection.json
-        |- ...
-    |-content_images
+  |-content_creator
+      |- content.json
+      |- siteroot.json
+      |- de.mysection.json
+      |- ...
+  |-content_images
 
 using these names (for both files and folders) as sensible defaults.
 
 and creates the content in a tree like from `content.json` using the runner, and
 object by object using the standalone json files.
 
-In your setuphandlers.py you need to:
+In your setuphandlers.py you need to::
 
   from kitconcept.contentcreator.creator import content_creator_from_folder
   ...
