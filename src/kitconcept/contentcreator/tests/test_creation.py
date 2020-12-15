@@ -8,6 +8,7 @@ from kitconcept.contentcreator.testing import (
 from plone import api
 from plone.app.testing import applyProfile
 
+import json
 import os
 import unittest
 
@@ -202,5 +203,5 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        self.assertEqual(blocks, self.portal.blocks)
-        self.assertEqual(blocks_layout, self.portal.blocks_layout)
+        self.assertEqual(blocks, json.loads(self.portal.blocks))
+        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
