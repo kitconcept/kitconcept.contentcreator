@@ -593,8 +593,8 @@ def create_item_runner(  # noqa
 
 
 def content_creator_from_folder(
-    folder_name,
-    base_image_path=os.path.dirname(__file__),
+    folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
+    base_image_path=os.path.join(os.path.dirname(__file__), "content_images"),
     default_lang=None,
     default_wf_state=None,
     ignore_wf_types=["Image", "File"],
@@ -602,9 +602,31 @@ def content_creator_from_folder(
     temp_enable_content_types=[],
     custom_order=[],
 ):
-    """Creates content from the files given a folder name
+    """
+    Main entry point for the content creator. It allows to have a structure like:
+    |-content_creator
+        |- content.json
+        |- siteroot.json
+        |- de.mysection.json
+        |- ...
+    |-content_images
 
-    The path and id are determined by the name of the file like in
+    using these names (for both files and folders) as sensible defaults.
+
+    and creates the content in a tree like from `content.json` using the runner, and
+    object by object using the standalone json files.
+
+    In your setuphandlers.py you need to:
+
+    from kitconcept.contentcreator.creator import content_creator_from_folder
+    ...
+
+    content_creator_from_folder()
+
+    in the `import_content` method (triggered by GenericSetup on plonesite recipe install)
+    or in a place that it gets properly called.
+
+    The path and id of the standalone objects creation are determined by the name of the file like in
 
     de.beispiele.bildergroessen.json
 
@@ -635,6 +657,7 @@ def content_creator_from_folder(
         # If a content.json is found, proceed as if it contains a normal json arrayed
         # structure
         if file_ == "content.json":
+            print_info("content.json file found, creating content")
             content_structure = load_json(os.path.join(folder, "content.json"))
             create_item_runner(
                 api.portal.get(),
@@ -646,6 +669,11 @@ def content_creator_from_folder(
                 base_image_path=base_image_path,
             )
             continue
+        elif file_ == "siteroot.json":
+            print_info("Site root info found, applying changes")
+            root_info = load_json(os.path.join(folder, "siteroot.json"))
+            modify_siteroot(root_info)
+
         # ex.: file_ = 'de.ueber-uns.json'
         filepath = os.path.join(folder, file_)
         # ex.: path = '/de'
@@ -679,3 +707,21 @@ def content_creator_from_folder(
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)
+
+
+def modify_siteroot(root_info):
+    portal = api.portal.get()
+    blocks = root_info["blocks"]
+    blocks_layout = root_info["blocks_layout"]
+
+    if not getattr(portal, "blocks", False):
+        portal.manage_addProperty("blocks", json.dumps(blocks), "string")
+    else:
+        portal.blocks = blocks
+
+    if not getattr(portal, "blocks_layout", False):
+        portal.manage_addProperty(
+            "blocks_layout", json.dumps(blocks_layout), "string"
+        )  # noqa
+    else:
+        portal.blocks_layout = blocks_layout

@@ -161,7 +161,7 @@ class CreatorTestCase(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), "content")
 
         with api.env.adopt_roles(["Manager"]):
-            content_creator_from_folder(path)
+            content_creator_from_folder(folder_name=path)
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
@@ -186,3 +186,21 @@ class CreatorTestCase(unittest.TestCase):
             ["a-document-2", "a-document-1", "a-document-3", "the-last-document"],
             self.portal["a-folder"].contentIds(),
         )
+
+    def test_content_from_folder_siteroot(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+        blocks = {
+            "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
+            "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "text"},
+        }
+        blocks_layout = {
+            "items": [
+                "d3f1c443-583f-4e8e-a682-3bf25752a300",
+                "7624cf59-05d0-4055-8f55-5fd6597d84b0",
+            ]
+        }
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=path)
+
+        self.assertEqual(blocks, self.portal.blocks)
+        self.assertEqual(blocks_layout, self.portal.blocks_layout)
