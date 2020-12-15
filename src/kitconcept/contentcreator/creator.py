@@ -18,6 +18,8 @@ from zope.component import queryMultiAdapter
 from zope.event import notify
 from zope.globalrequest import getRequest
 from zope.lifecycleevent import ObjectCreatedEvent
+from zExceptions import NotFound
+from kitconcept.contentcreator.scales import plone_scale_generate_on_save
 
 import json
 import logging
@@ -66,6 +68,16 @@ DEFAULT_BLOCKS_LAYOUT = {
         "7624cf59-05d0-4055-8f55-5fd6597d84b0",
     ]
 }
+
+
+def print_error(error_string):  # RED
+    print("\033[31mERROR: {}\033[0m".format(error_string))
+    logger.error("{}".format(error_string))
+
+
+def print_info(info_string):  # GREEN
+    print("\033[33m{}\033[0m".format(info_string))
+    logger.info("{}".format(info_string))
 
 
 def load_json(path, base_path=None):
@@ -325,6 +337,7 @@ def create_item_runner(  # noqa
 
             get_file_type = magic.Magic(mime=True)
             # Populate image if any
+            image_fieldnames_added = []
             if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
                 if data.get("set_dummy_image", False):
                     new_file = BytesIO()
@@ -365,6 +378,8 @@ def create_item_runner(  # noqa
                             NamedBlobImage(data=new_file, contentType="image/png"),
                         )
 
+                    image_fieldnames_added + data["set_dummy_image"]
+
                 elif data.get("set_dummy_image", False) and isinstance(
                     data.get("set_dummy_image"), bool
                 ):
@@ -372,6 +387,8 @@ def create_item_runner(  # noqa
                     obj.image = NamedBlobImage(
                         data=generate_image().tobytes(), contentType="image/png"
                     )
+
+                    image_fieldnames_added.append("image")
 
                 if data.get("set_dummy_file", False) and isinstance(
                     data.get("set_dummy_file"), list
@@ -417,6 +434,8 @@ def create_item_runner(  # noqa
                             ),
                         )
 
+                        image_fieldnames_added.append(image_data[0])
+
                 elif data.get("set_local_image", False) and isinstance(
                     data.get("set_local_image"), str
                 ):
@@ -432,6 +451,8 @@ def create_item_runner(  # noqa
                         filename=data.get("set_local_image"),
                         contentType=content_type,
                     )
+
+                    image_fieldnames_added.append("image")
 
                 if data.get("set_local_file", False) and isinstance(
                     data.get("set_local_file"), dict
@@ -480,6 +501,9 @@ def create_item_runner(  # noqa
                     notify(ObjectCreatedEvent(obj))
 
                 obj = add(container, obj, rename=not bool(id_))
+                for image_fieldname in image_fieldnames_added:
+                    print_info("Generating image scales for {}".format(image_fieldname))
+                    plone_scale_generate_on_save(obj, request, image_fieldname)
 
             # Set UUID - TODO: add to p.restapi
             if (
@@ -627,7 +651,10 @@ def content_creator_from_folder(
         # ex.: path = '/de'
         splitted_path = os.path.splitext(file_)[0].split(".")
         path = "/" + "/".join(splitted_path[:-1])
-        container = api.content.get(path=path)
+        try:
+            container = api.content.get(path=path)
+        except NotFound:
+            print_error('Could not look up container under "{}"'.format(path))
         if container is None:
             container = create_object(path)
         try:
@@ -643,8 +670,12 @@ def content_creator_from_folder(
                 logger=logger,
                 base_image_path=base_image_path,
             )
-        except ValueError:
-            logger.error('Error in file structure: "{0}"'.format(filepath))
+        except ValueError as e:
+            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+        except FileNotFoundError as e:
+            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+        except Exception as e:  # noqa
+            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)
