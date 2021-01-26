@@ -6,6 +6,8 @@ Changelog
 
 - Improve content language detection if the field is not present
   [sneridagh]
+- Fix and improve language inferring in the editing of an existing content
+  [sneridagh]
 
 1.0.6 (2020-05-08)
 ------------------

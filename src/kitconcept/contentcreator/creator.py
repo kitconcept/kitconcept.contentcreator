@@ -315,12 +315,15 @@ def create_item_runner(  # noqa
                 if (
                     installer.isProductInstalled("plone.app.multilingual")
                     and len(supported_langs) > 1
+                    and not obj.language
                 ):
-                    # Get language from path and set it
+                    # If pam, supported langs are two or more, and obj has no language set
+                    # get language from path and set it
                     data["language"] = get_lang_from_lrf(container, supported_langs)
-
                 else:
-                    data["language"] = default_lang
+                    # If object does not have already language, and default_lang is set
+                    if not obj.language and default_lang:
+                        data["language"] = default_lang
 
             if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
                 data["review_state"] = default_wf_state
