@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.6 (unreleased)
+1.1.0 (2021-01-26)
 ------------------
 
 - Improve content language detection if the field is not present
