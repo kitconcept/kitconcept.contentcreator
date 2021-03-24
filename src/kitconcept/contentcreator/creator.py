@@ -281,7 +281,7 @@ def create_item_runner(  # noqa
             try:
                 obj = create(container, type_, id_=id_, title=title)
             except:  # noqa
-                logger.warn(
+                print_error(
                     "Can not create object {} ({}) in {}".format(
                         id_, type_, "/".join(container.getPhysicalPath())
                     )
@@ -299,7 +299,7 @@ def create_item_runner(  # noqa
             deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
 
             if deserializer is None:
-                logger.warn("Cannot deserialize type {}".format(obj.portal_type))
+                print_error("Cannot deserialize type {}".format(obj.portal_type))
                 continue
 
             # defaults
@@ -580,7 +580,7 @@ def create_item_runner(  # noqa
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
             message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'
-            logger.error(message.format(type_, container_path, id_, title, e))
+            print_error(message.format(type_, container_path, id_, title, e))
             continue
 
         # Call recursively
