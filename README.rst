@@ -17,6 +17,8 @@ kitconcept.contentcreator
 This package is the responsible for automated content creation via
 plone.restapi serializers/creators.
 
+Initially based on ``collective.contentcreator`` written by Johannes Raggam (@thet) and evolved and improved from it.
+
 Usage
 =====
 
@@ -32,7 +34,8 @@ It allows to have a structure in your policy package like::
       |- ...
   |-content_images
 
-using these names (for both files and folders) as sensible defaults.
+using these names (for both files and folders) as sensible defaults. This is the
+recommended way, although you can specify runners for custom JSON files (see below).
 
 and creates the content in a tree like from `content.json` using the runner, and
 object by object using the standalone json files.
@@ -43,6 +46,19 @@ In your setuphandlers.py you need to::
   ...
 
   content_creator_from_folder()
+
+the method ``content_creator_from_folder`` has the following signature::
+
+  def content_creator_from_folder(
+    folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
+    base_image_path=os.path.join(os.path.dirname(__file__), "content_images"),
+    default_lang=None,
+    default_wf_state=None,
+    ignore_wf_types=["Image", "File"],
+    logger=logger,
+    temp_enable_content_types=[],
+    custom_order=[],
+  ):
 
 Creator runner given a single file
 ----------------------------------
@@ -142,8 +158,8 @@ other common use is calling from a folder::
       ],
   )
 
-Images
-------
+Images and Files
+----------------
 
 For the creation of images, you can use the plone.restapi approach using the
 following serialization mapping containg the file data and some additional
@@ -178,7 +194,7 @@ in the specified fields in the to be created content type::
         "set_dummy_image": ["image"]
       }
 
-the deprecated form is also supported (it will create the image in the
+A deprecated syntax form is also supported (it will create the image in the
 ``image`` field)::
 
       {
@@ -198,7 +214,7 @@ attribute with the field name and the filename of the real image::
         "set_local_image": {"image": "image.png"}
       }
 
-the deprecated form is also supported (it will create the image in the
+Again, a deprecated form is also supported (it will create the image in the
 ``image`` field)::
 
       {
@@ -208,7 +224,7 @@ the deprecated form is also supported (it will create the image in the
         "set_local_image": "image.png"
       }
 
-the same happen with files::
+the same syntax is valid for files::
 
       {
         "id": "an-file",
@@ -247,7 +263,7 @@ the deprecated form is also supported (it will create the file in the
         "set_local_file": "file.png"
       }
 
-You can specify the ``base_path`` for the image in the ``create_item_runner``::
+For all local images and files specified, you can specify the ``base_path`` for the image in the ``create_item_runner``::
 
   create_item_runner(
       api.portal.get(),
