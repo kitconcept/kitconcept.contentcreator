@@ -504,8 +504,13 @@ def create_item_runner(  # noqa
                     notify(ObjectCreatedEvent(obj))
 
                 obj = add(container, obj, rename=not bool(id_))
+                obj_path = "/".join(obj.getPhysicalPath())
                 for image_fieldname in image_fieldnames_added:
-                    print_info("Generating image scales for {}".format(image_fieldname))
+                    print_info(
+                        "Generating image scales for {} field in {}".format(
+                            image_fieldname, obj_path
+                        )
+                    )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
 
             # Set UUID - TODO: add to p.restapi
