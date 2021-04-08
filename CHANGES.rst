@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1.1 (unreleased)
+1.2.0 (2021-04-08)
 ------------------
 
 - Black list ``images`` foder inside the create content folders
