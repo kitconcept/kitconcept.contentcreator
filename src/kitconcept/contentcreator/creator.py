@@ -272,22 +272,22 @@ def create_item_runner(  # noqa
             container.fgVocabulary = data.get("fgVocabulary", [])
             continue
 
+        create_object = False
         if container.get(id_, False):
             # We check if the object is already created, if so we edit it
             obj = container[id_]
-            create_object = False
         else:
             # if don't we create it
             try:
                 obj = create(container, type_, id_=id_, title=title)
+                create_object = True
             except:  # noqa
                 print_error(
                     "Can not create object {} ({}) in {}".format(
                         id_, type_, "/".join(container.getPhysicalPath())
                     )
                 )
-            create_object = True
-
+                continue
         try:
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -681,6 +681,10 @@ def content_creator_from_folder(
             print_info("Site root info found, applying changes")
             root_info = load_json(os.path.join(folder, "siteroot.json"))
             modify_siteroot(root_info)
+            continue
+        # blacklist "images" folder
+        elif file_ == "images":
+            continue
 
         # ex.: file_ = 'de.ueber-uns.json'
         filepath = os.path.join(folder, file_)

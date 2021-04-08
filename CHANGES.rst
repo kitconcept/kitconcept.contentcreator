@@ -4,8 +4,10 @@ Changelog
 1.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Black list ``images`` foder inside the create content folders
+  [sneridagh]
+- Improve error detection and report
+  [sneridagh]
 
 1.1.0 (2021-01-26)
 ------------------

@@ -32,6 +32,7 @@ It allows to have a structure in your policy package like::
       |- siteroot.json
       |- de.mysection.json
       |- ...
+      |- images
   |-content_images
 
 using these names (for both files and folders) as sensible defaults. This is the
@@ -39,6 +40,8 @@ recommended way, although you can specify runners for custom JSON files (see bel
 
 and creates the content in a tree like from `content.json` using the runner, and
 object by object using the standalone json files.
+
+The ``images`` folder is blacklisted to support the images folder to be inside the creator folder.
 
 In your setuphandlers.py you need to::
 

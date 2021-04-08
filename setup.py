@@ -45,10 +45,7 @@ setup(
         "plone.restapi",
         "Products.GenericSetup>=1.8.2",
         "setuptools",
-        "z3c.jbot",
-        "python-magic"
-        # 'Products.PloneFormGen',
-        # 'plone.formwidget.captcha',
+        "python-magic",
     ],
     extras_require={
         "test": [
