@@ -729,11 +729,11 @@ def modify_siteroot(root_info):
     if not getattr(portal, "blocks", False):
         portal.manage_addProperty("blocks", json.dumps(blocks), "string")
     else:
-        portal.blocks = blocks
+        portal.blocks = json.dumps(blocks)
 
     if not getattr(portal, "blocks_layout", False):
         portal.manage_addProperty(
             "blocks_layout", json.dumps(blocks_layout), "string"
         )  # noqa
     else:
-        portal.blocks_layout = blocks_layout
+        portal.blocks_layout = json.dumps(blocks_layout)
