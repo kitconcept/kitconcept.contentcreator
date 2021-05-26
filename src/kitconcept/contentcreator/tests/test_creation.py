@@ -205,3 +205,30 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(blocks, json.loads(self.portal.blocks))
         self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+
+    def test_repeat_creation_twice(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+        blocks = {
+            "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
+            "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "text"},
+        }
+        blocks_layout = {
+            "items": [
+                "d3f1c443-583f-4e8e-a682-3bf25752a300",
+                "7624cf59-05d0-4055-8f55-5fd6597d84b0",
+            ]
+        }
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=path)
+
+        self.assertEqual(blocks, json.loads(self.portal.blocks))
+        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+
+        self.portal["a-folder"]["a-document-1"].title = "the modified title"
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=path)
+
+        self.assertEqual(
+            self.portal["a-folder"]["a-document-1"].title, "Test Document 1"
+        )
