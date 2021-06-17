@@ -1,6 +1,8 @@
-[{
-  "id": "a-folder",
-  "@type": "Folder",
-  "title": "Test Folder",
-  "description": "The description"
-}]
+[
+  {
+    "id": "a-folder",
+    "@type": "Folder",
+    "title": "Test Folder",
+    "description": "The description"
+  }
+]

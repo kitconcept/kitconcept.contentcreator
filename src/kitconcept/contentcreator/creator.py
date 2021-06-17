@@ -20,6 +20,13 @@ from zope.globalrequest import getRequest
 from zope.lifecycleevent import ObjectCreatedEvent
 from zExceptions import NotFound
 from kitconcept.contentcreator.scales import plone_scale_generate_on_save
+from plone.restapi.behaviors import IBlocks
+
+from plone.restapi.interfaces import IDeserializeFromJson
+from zope.component import getMultiAdapter
+from plone.dexterity.utils import iterSchemata
+from plone.restapi.interfaces import IFieldSerializer
+from z3c.form.interfaces import IDataManager
 
 import json
 import logging
@@ -600,6 +607,94 @@ def create_item_runner(  # noqa
         )
 
 
+def get_objects_created(container, content_structure):
+    paths = []
+
+    for data in content_structure:
+        id_ = data.get("id", None)
+        obj = container[id_]
+
+        paths.append("/".join(obj.getPhysicalPath()))
+        result = get_objects_created(
+            obj,
+            content_structure=data.get("items", []),
+        )
+
+        if result:
+            paths = paths + result
+        return paths
+
+
+def refresh_objects_created_by_structure(container, content_structure):
+    def deserialize(obj, blocks=None, validate_all=False):
+        request = getRequest()
+        request["BODY"] = json.dumps({"blocks": blocks})
+        deserializer = getMultiAdapter((obj, request), IDeserializeFromJson)
+
+        return deserializer(validate_all=validate_all)
+
+    def serialize(context):
+        request = getRequest()
+        fieldname = "blocks"
+        for schema in iterSchemata(context):
+            if fieldname in schema:
+                field = schema.get(fieldname)
+                break
+
+        serializer = getMultiAdapter((field, context, request), IFieldSerializer)
+        return serializer()
+
+    for data in content_structure:
+        print_info(
+            "Refreshing structured (content.json) content serialization after creation..."
+        )
+        id_ = data.get("id", None)
+        obj = container[id_]
+
+        if IBlocks.providedBy(obj):
+            blocks_serialized = serialize(obj)
+            deserialize(obj, blocks_serialized)
+
+        refresh_objects_created_by_structure(
+            obj,
+            content_structure=data.get("items", []),
+        )
+
+
+def refresh_objects_created_by_file(filepath, file_):
+    def deserialize(obj, blocks=None, validate_all=False):
+        request = getRequest()
+        request["BODY"] = json.dumps({"blocks": blocks})
+        deserializer = getMultiAdapter((obj, request), IDeserializeFromJson)
+
+        return deserializer(validate_all=validate_all)
+
+    def serialize(context):
+        request = getRequest()
+        fieldname = "blocks"
+        for schema in iterSchemata(context):
+            if fieldname in schema:
+                field = schema.get(fieldname)
+                break
+
+        serializer = getMultiAdapter((field, context, request), IFieldSerializer)
+        return serializer()
+
+    splitted_path = os.path.splitext(file_)[0].split(".")
+    path = "/" + "/".join(splitted_path[:-1])
+    id_ = splitted_path[-1]
+    try:
+        container = api.content.get(path=path)
+    except NotFound:
+        print_error('Could not look up container under "{}"'.format(path))
+        return
+
+    obj = container.get(id_, None)
+    if obj and IBlocks.providedBy(obj):
+        blocks_serialized = serialize(obj)
+        deserialize(obj, blocks_serialized)
+
+
 def content_creator_from_folder(
     folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
     base_image_path=os.path.join(os.path.dirname(__file__), "content_images"),
@@ -661,10 +756,14 @@ def content_creator_from_folder(
         )
 
     files = sorted(os.listdir(folder), key=sort_key)
+    has_content_json = False
+    # has_siteroot_json = False
+
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
         # structure
         if file_ == "content.json":
+            has_content_json = True
             print_info("content.json file found, creating content")
             content_structure = load_json(os.path.join(folder, "content.json"))
             create_item_runner(
@@ -716,6 +815,14 @@ def content_creator_from_folder(
             print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
         except Exception as e:  # noqa
             print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+
+    # After creation, we refresh all the content created to update resolveuids
+    for file_ in files:
+        filepath = os.path.join(folder, file_)
+        print_info("Refreshing content serialization after creation...")
+        refresh_objects_created_by_file(filepath, file_)
+    if has_content_json:
+        refresh_objects_created_by_structure(api.portal.get(), content_structure)
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)

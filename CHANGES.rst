@@ -4,7 +4,9 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add refresh of the created content for updating the serialized blocks with the
+  resolveuid information
+  [sneridagh]
 
 
 1.2.0 (2021-04-08)

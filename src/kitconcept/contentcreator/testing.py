@@ -2,6 +2,7 @@
 from plone import api
 from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 from plone.app.robotframework.testing import REMOTE_LIBRARY_BUNDLE_FIXTURE
+from plone.app.testing import applyProfile
 from plone.app.testing import FunctionalTesting
 from plone.app.testing import IntegrationTesting
 from plone.app.testing import login
@@ -13,6 +14,7 @@ from plone.app.testing import TEST_USER_NAME
 from plone.testing import z2
 
 import kitconcept.contentcreator
+import plone.restapi
 
 
 class ContentcreatorCoreLayer(PloneSandboxLayer):
@@ -24,6 +26,7 @@ class ContentcreatorCoreLayer(PloneSandboxLayer):
         # The z3c.autoinclude feature is disabled in the Plone fixture base
         # layer.
         self.loadZCML(package=kitconcept.contentcreator)
+        self.loadZCML(package=plone.restapi)
 
     def setUpPloneSite(self, portal):
         setRoles(portal, TEST_USER_ID, ["Manager"])
@@ -31,6 +34,7 @@ class ContentcreatorCoreLayer(PloneSandboxLayer):
         api.content.create(
             type="Document", id="front-page", title="Welcome", container=portal
         )
+        applyProfile(portal, "plone.restapi:blocks")
         logout()
 
 

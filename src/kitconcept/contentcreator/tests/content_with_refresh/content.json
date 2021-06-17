@@ -1,0 +1,74 @@
+[
+  {
+    "id": "a-folder",
+    "@type": "Folder",
+    "title": "Test Folder",
+    "description": "The description",
+    "items": [
+      {
+        "id": "a-document",
+        "@type": "Document",
+        "title": "Test Document",
+        "description": "The description",
+        "blocks": {
+          "123": {
+            "@type": "__grid",
+            "columns": [{ "href": [{ "@id": "/a-folder/anotherdoc" }] }]
+          },
+          "2caef9e6-93ff-4edf-896f-8c16654a9923": {
+            "@type": "slate",
+            "plaintext": "this is a slate link inside some text",
+            "value": [
+              {
+                "type": "p",
+                "children": [
+                  { "text": "this is a " },
+                  {
+                    "children": [
+                      { "text": "" },
+                      {
+                        "type": "a",
+                        "children": [{ "text": "slate link" }],
+                        "data": {
+                          "link": {
+                            "internal": {
+                              "internal_link": [
+                                {
+                                  "@id": "/a-folder/anotherdoc",
+                                  "title": "Image 1"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      { "text": "" }
+                    ],
+                    "type": "strong"
+                  },
+                  { "text": " inside some text" }
+                ]
+              }
+            ]
+          }
+        },
+        "blocks_layout": {
+          "items": ["123", "2caef9e6-93ff-4edf-896f-8c16654a9923"]
+        }
+      },
+      {
+        "id": "anotherdoc",
+        "@type": "Document",
+        "title": "Another Document",
+        "description": "The description another",
+        "blocks": {
+          "123": {
+            "@type": "__grid",
+            "columns": [{ "href": [{ "@id": "/a-folder/a-document" }] }]
+          }
+        },
+        "blocks_layout": { "items": ["123"] }
+      }
+    ]
+  }
+]

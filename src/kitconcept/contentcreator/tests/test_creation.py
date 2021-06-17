@@ -2,11 +2,16 @@
 from kitconcept.contentcreator.creator import create_item_runner
 from kitconcept.contentcreator.creator import content_creator_from_folder
 from kitconcept.contentcreator.creator import load_json
+from kitconcept.contentcreator.creator import get_objects_created
+from kitconcept.contentcreator.creator import refresh_objects_created_by_structure
 from kitconcept.contentcreator.testing import (
     CONTENTCREATOR_CORE_INTEGRATION_TESTING,
 )  # noqa
 from plone import api
 from plone.app.testing import applyProfile
+
+from plone.dexterity.interfaces import IDexterityFTI
+from zope.component import queryUtility
 
 import json
 import os
@@ -232,3 +237,34 @@ class CreatorTestCase(unittest.TestCase):
         self.assertEqual(
             self.portal["a-folder"]["a-document-1"].title, "Test Document 1"
         )
+
+    # def test_get_contents(self):
+    #     path = os.path.join(os.path.dirname(__file__), "content_with_refresh")
+    #     with api.env.adopt_roles(["Manager"]):
+    #         content_creator_from_folder(folder_name=path)
+
+    #     content_structure = load_json(
+    #         os.path.join(os.path.dirname(__file__), "content", "content.json")
+    #     )
+
+    #     result = get_objects_created(api.portal.get(), content_structure)
+
+    #     pass
+
+    def test_refresh_objects_created_by_structure(self):
+        path = os.path.join(os.path.dirname(__file__), "content_with_refresh")
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=path)
+
+        content_structure = load_json(
+            os.path.join(
+                os.path.dirname(__file__), "content_with_refresh", "content.json"
+            )
+        )
+
+        refresh_objects_created_by_structure(api.portal.get(), content_structure)
+        self.assertTrue(
+            "resolveuid" in json.dumps(self.portal["a-folder"]["a-document"].blocks)
+        )
+
+        pass
