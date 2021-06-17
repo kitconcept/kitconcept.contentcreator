@@ -622,10 +622,7 @@ def get_objects_created(container, content_structure):
         obj = container[id_]
 
         paths.append("/".join(obj.getPhysicalPath()))
-        result = get_objects_created(
-            obj,
-            content_structure=data.get("items", []),
-        )
+        result = get_objects_created(obj, content_structure=data.get("items", []))
 
         if result:
             paths = paths + result
@@ -689,8 +686,7 @@ def refresh_objects_created_by_structure(container, content_structure):
 
         if obj:
             refresh_objects_created_by_structure(
-                obj,
-                content_structure=data.get("items", []),
+                obj, content_structure=data.get("items", [])
             )
 
 
