@@ -645,13 +645,10 @@ def refresh_objects_created_by_structure(container, content_structure):
         return serializer()
 
     for data in content_structure:
-        print_info(
-            "Refreshing structured (content.json) content serialization after creation..."
-        )
         id_ = data.get("id", None)
-        obj = container[id_]
+        obj = container.get(id_, None)
 
-        if IBlocks.providedBy(obj):
+        if obj and IBlocks.providedBy(obj):
             blocks_serialized = serialize(obj)
             deserialize(obj, blocks_serialized)
 
@@ -822,6 +819,9 @@ def content_creator_from_folder(
         print_info("Refreshing content serialization after creation...")
         refresh_objects_created_by_file(filepath, file_)
     if has_content_json:
+        print_info(
+            "Refreshing structured (content.json) content serialization after creation..."
+        )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)
 
     for content_type in temp_enable_content_types:
