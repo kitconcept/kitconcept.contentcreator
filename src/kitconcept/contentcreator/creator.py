@@ -21,6 +21,8 @@ from zope.lifecycleevent import ObjectCreatedEvent
 from zExceptions import NotFound
 from kitconcept.contentcreator.scales import plone_scale_generate_on_save
 from plone.restapi.behaviors import IBlocks
+from plone.app.content.interfaces import INameFromTitle
+from zope.container.interfaces import INameChooser
 
 from plone.restapi.interfaces import IDeserializeFromJson
 from zope.component import getMultiAdapter
@@ -506,6 +508,8 @@ def create_item_runner(  # noqa
             if temporarily_wrapped:
                 obj = aq_base(obj)
 
+            path = "/".join(obj.getPhysicalPath())
+
             if create_object:
                 if not getattr(deserializer, "notifies_create", False):
                     notify(ObjectCreatedEvent(obj))
@@ -519,6 +523,10 @@ def create_item_runner(  # noqa
                         )
                     )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
+
+                logger.info("{0}: created".format(path))
+            else:
+                logger.info("{0}: edited".format(path))
 
             # Set UUID - TODO: add to p.restapi
             if (
@@ -552,7 +560,6 @@ def create_item_runner(  # noqa
 
             id_ = obj.id  # get the real id
             path = "/".join(obj.getPhysicalPath())
-            logger.info("{0}: created".format(path))
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
@@ -644,18 +651,47 @@ def refresh_objects_created_by_structure(container, content_structure):
         serializer = getMultiAdapter((field, context, request), IFieldSerializer)
         return serializer()
 
+    def get_content_by_data(data, container):
+        type_ = data.get("@type", None)
+        id_ = data.get("id", None)
+        title = data.get("title", None)
+
+        obj = create(container, type_, id_=id_, title=title)
+        chooser = INameChooser(container)
+        # INameFromTitle adaptable objects should not get a name
+        # suggestion. NameChooser would prefer the given name instead of
+        # the one provided by the INameFromTitle adapter.
+        suggestion = None
+        name_from_title = INameFromTitle(obj, None)
+        if name_from_title is None:
+            suggestion = obj.Title()
+        id_ = chooser.chooseName(suggestion, obj)
+        original = id_[:-2]
+        return container.get(original, None)
+
     for data in content_structure:
         id_ = data.get("id", None)
-        obj = container.get(id_, None)
+        if not id_:
+            obj = get_content_by_data(data, container)
+            if not obj:
+                print_error(
+                    "id can't be guessed for {0} in container {1}".format(
+                        "/".join(container.getPhysicalPath()), data["title"]
+                    )
+                )
+                return
+        else:
+            obj = container.get(id_, None)
 
         if obj and IBlocks.providedBy(obj):
             blocks_serialized = serialize(obj)
             deserialize(obj, blocks_serialized)
 
-        refresh_objects_created_by_structure(
-            obj,
-            content_structure=data.get("items", []),
-        )
+        if obj:
+            refresh_objects_created_by_structure(
+                obj,
+                content_structure=data.get("items", []),
+            )
 
 
 def refresh_objects_created_by_file(filepath, file_):
