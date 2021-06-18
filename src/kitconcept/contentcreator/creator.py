@@ -524,10 +524,6 @@ def create_item_runner(  # noqa
                     )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
 
-                logger.info("{0}: created".format(path))
-            else:
-                logger.info("{0}: edited".format(path))
-
             # Set UUID - TODO: add to p.restapi
             if (
                 data.get("UID", False)
@@ -560,6 +556,11 @@ def create_item_runner(  # noqa
 
             id_ = obj.id  # get the real id
             path = "/".join(obj.getPhysicalPath())
+
+            if create_object:
+                logger.info("{0}: created".format(path))
+            else:
+                logger.info("{0}: edited".format(path))
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
@@ -846,9 +847,10 @@ def content_creator_from_folder(
             print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     # After creation, we refresh all the content created to update resolveuids
+    if len(files) > 0:
+        print_info("Refreshing content serialization after creation...")
     for file_ in files:
         filepath = os.path.join(folder, file_)
-        print_info("Refreshing content serialization after creation...")
         refresh_objects_created_by_file(filepath, file_)
     if has_content_json:
         print_info(
