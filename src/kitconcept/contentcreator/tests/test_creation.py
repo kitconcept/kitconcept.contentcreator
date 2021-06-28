@@ -2,7 +2,6 @@
 from kitconcept.contentcreator.creator import create_item_runner
 from kitconcept.contentcreator.creator import content_creator_from_folder
 from kitconcept.contentcreator.creator import load_json
-from kitconcept.contentcreator.creator import get_objects_created
 from kitconcept.contentcreator.creator import refresh_objects_created_by_structure
 from kitconcept.contentcreator.testing import (
     CONTENTCREATOR_CORE_INTEGRATION_TESTING,
