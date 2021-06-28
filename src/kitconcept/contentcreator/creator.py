@@ -28,7 +28,8 @@ from plone.restapi.interfaces import IDeserializeFromJson
 from zope.component import getMultiAdapter
 from plone.dexterity.utils import iterSchemata
 from plone.restapi.interfaces import IFieldSerializer
-from z3c.form.interfaces import IDataManager
+from plone.restapi.services.content.utils import add
+from plone.restapi.services.content.utils import create
 
 import json
 import logging
@@ -45,16 +46,6 @@ try:
 except pkg_resources.DistributionNotFound:  # pragma: no restapi
     ARCHETYPES_PRESENT = False
 
-
-try:
-    pkg_resources.get_distribution("plone.restapi")
-    from plone.restapi.interfaces import IDeserializeFromJson
-    from plone.restapi.services.content.utils import add
-    from plone.restapi.services.content.utils import create
-
-    PRESTAPI_PRESENT = True
-except pkg_resources.DistributionNotFound:  # pragma: no restapi
-    PRESTAPI_PRESENT = False
 
 try:
     from Products.CMFPlone.utils import get_installer
