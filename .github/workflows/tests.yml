@@ -1,4 +1,4 @@
-name: kitconcept.contentcreator CI
+name: Tests
 on: [push]
 jobs:
   build:

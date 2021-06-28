@@ -4,9 +4,16 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
+Bugfix:
+
 - Add refresh of the created content for updating the serialized blocks with the
   resolveuid information
   [sneridagh]
+
+Internal:
+
+- Remove some unused imports [timo]
+- Add flake8 check on CI [timo]
 
 
 1.2.0 (2021-04-08)
