@@ -10,9 +10,6 @@ from kitconcept.contentcreator.testing import (
 from plone import api
 from plone.app.testing import applyProfile
 
-from plone.dexterity.interfaces import IDexterityFTI
-from zope.component import queryUtility
-
 import json
 import os
 import unittest
