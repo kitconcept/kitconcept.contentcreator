@@ -4,7 +4,10 @@ Changelog
 1.2.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+Breaking:
+
+- Use Slate as default text block
+  [sneridagh]
 
 
 1.2.1 (2021-07-09)
