@@ -264,3 +264,20 @@ class CreatorTestCase(unittest.TestCase):
         )
 
         pass
+
+    def test_edit_if_content_already_exists_given_modified_date(self):
+        content_structure = load_json("test_content.json", __file__)
+
+        self.portal.invokeFactory("Folder", "a-folder")
+        self.assertIn("a-folder", self.portal.objectIds())
+
+        with api.env.adopt_roles(["Manager"]):
+            create_item_runner(
+                self.portal,
+                content_structure,
+                default_lang="en",
+                default_wf_state="published",
+                do_not_edit_if_modified_after="2021-07-12",
+            )
+
+        self.assertEqual(self.portal["a-folder"].description, "")
