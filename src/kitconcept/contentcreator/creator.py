@@ -23,6 +23,7 @@ from kitconcept.contentcreator.scales import plone_scale_generate_on_save
 from plone.restapi.behaviors import IBlocks
 from plone.app.content.interfaces import INameFromTitle
 from zope.container.interfaces import INameChooser
+from DateTime import DateTime
 
 from plone.restapi.interfaces import IDeserializeFromJson
 from zope.component import getMultiAdapter
@@ -206,6 +207,7 @@ def create_item_runner(  # noqa
     default_wf_state=None,
     ignore_wf_types=["Image", "File"],
     logger=logger,
+    do_not_edit_if_modified_after=None,
 ):
     """Create Dexterity contents from plone.restapi compatible structures.
 
@@ -288,6 +290,14 @@ def create_item_runner(  # noqa
                     )
                 )
                 continue
+        if (
+            not create_object
+            and do_not_edit_if_modified_after is not None
+            and DateTime(obj.modification_date)
+            > DateTime(do_not_edit_if_modified_after)
+        ):
+            continue
+
         try:
             # Acquisition wrap temporarily to satisfy things like vocabularies
             # depending on tools
@@ -725,6 +735,7 @@ def content_creator_from_folder(
     logger=logger,
     temp_enable_content_types=[],
     custom_order=[],
+    do_not_edit_if_modified_after=None,
 ):
     """
     Main entry point for the content creator. It allows to have a structure like:
@@ -795,6 +806,7 @@ def content_creator_from_folder(
                 ignore_wf_types=ignore_wf_types,
                 logger=logger,
                 base_image_path=base_image_path,
+                do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
             continue
         elif file_ == "siteroot.json":
@@ -829,6 +841,7 @@ def content_creator_from_folder(
                 ignore_wf_types=ignore_wf_types,
                 logger=logger,
                 base_image_path=base_image_path,
+                do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
         except ValueError as e:
             print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
