@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0.1 (unreleased)
+2.1.0 (2021-10-13)
 ------------------
 
 - New ``do_not_edit_if_modified_after`` option. Allows to not edit if the given date is lesser than the object modification date.
