@@ -60,7 +60,7 @@ logger = logging.getLogger("kitconcept.contentcreator")
 DEFAULT_BLOCKS = {
     "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
     # "35240ad8-3625-4611-b76f-03471bcf6b34": {"@type": "description"},
-    "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "slate"},
+    "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "text"},
 }
 DEFAULT_BLOCKS_LAYOUT = {
     "items": [
