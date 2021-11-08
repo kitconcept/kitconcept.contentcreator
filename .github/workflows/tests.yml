@@ -4,28 +4,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: [3.8]
+        python:
+          - 3.9
+          - 3.8
+          - 3.7
+        plone:
+          - "5.2.5"
+          - "5.2.6"
+        exclude:
+          - plone: "5.2.6"
+            python: 3.9
+          - plone: "5.2.5"
+            python: 3.9
     steps:
       # git checkout
       - uses: actions/checkout@v2
 
-      # python setup
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+      - name: Setup Plone ${{ matrix.plone }} with Python ${{ matrix.python }}
+        uses: plone/setup-plone@v1.0.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
+          plone-version: ${{ matrix.plone }}
 
-      # python cache
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # build, test
-      - name: buildout
-        run: make
-      - name: tests
-        run: make test
+      - name: Install package
+        run: |
+          pip install -e ".[test]" --use-deprecated legacy-resolver
+      - name: Run tests
+        run: |
+          PYTHONWARNINGS=ignore zope-testrunner --auto-color --auto-progress --test-path src/
