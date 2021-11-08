@@ -42,7 +42,7 @@ setup(
     install_requires=[
         "plone.api",
         "plone.portlets",
-        "plone.restapi",
+        "plone.restapi>=7.5.0",
         "Products.GenericSetup",
         "setuptools",
         "python-magic",
