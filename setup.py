@@ -42,18 +42,15 @@ setup(
     install_requires=[
         "plone.api",
         "plone.portlets",
-        "plone.restapi",
-        "Products.GenericSetup>=1.8.2",
+        "plone.restapi>=7.5.0",
+        "Products.GenericSetup",
         "setuptools",
         "python-magic",
     ],
     extras_require={
         "test": [
             "plone.app.testing",
-            # Plone KGS does not use this version, because it would break
-            # Remove if your package shall be part of coredev.
-            # plone_coredev tests as of 2016-04-01.
-            "plone.testing>=5.0.0",
+            "plone.testing",
             "plone.app.contenttypes",
             "plone.app.robotframework[debug]",
         ]

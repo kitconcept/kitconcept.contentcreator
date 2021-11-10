@@ -4,7 +4,15 @@ Changelog
 2.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+
+- Explicitly include dependencies (supporting pip installations)
+  [ericof]
+
+- Use plone/setup-plone@v1.0.0 in Github actions
+  [ericof]
+
+- Require plone.restapi 7.5.0 or superior (volto-slate blocks: resolveuid for links, transformer support)
+  [ericof]
 
 
 2.1.0 (2021-10-13)
