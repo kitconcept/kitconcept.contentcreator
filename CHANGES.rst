@@ -4,7 +4,8 @@ Changelog
 3.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add classifiers to setup.py for Python 3.8, 3.9 and maturity.
+  [timo]
 
 
 3.0.0 (2021-11-10)
