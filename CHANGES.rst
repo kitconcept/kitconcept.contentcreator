@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.1 (unreleased)
+3.0.1 (2021-11-11)
 ------------------
 
 - Add classifiers to setup.py for Python 3.8, 3.9 and maturity.
