@@ -283,10 +283,10 @@ def create_item_runner(  # noqa
             try:
                 obj = create(container, type_, id_=id_, title=title)
                 create_object = True
-            except:  # noqa
+            except Exception as e:
                 print_error(
-                    "Can not create object {} ({}) in {}".format(
-                        id_, type_, "/".join(container.getPhysicalPath())
+                    "Can not create object {} ({}) in {}, because of {}".format(
+                        id_, type_, "/".join(container.getPhysicalPath()), e
                     )
                 )
                 continue
@@ -544,6 +544,11 @@ def create_item_runner(  # noqa
                 and obj.portal_type not in ignore_wf_types
             ):  # noqa
                 api.content.transition(obj=obj, to_state=data.get("review_state"))
+                if data.get("review_state") == "published" and not data.get(
+                    "effective", False
+                ):
+                    # Side-effect if review_state is published, always set the effective date
+                    obj.effective_date = DateTime()
 
             # set default
             opts = data.get("opts", {})

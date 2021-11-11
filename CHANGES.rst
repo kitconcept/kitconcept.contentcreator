@@ -6,7 +6,8 @@ Changelog
 
 - Add classifiers to setup.py for Python 3.8, 3.9 and maturity.
   [timo]
-
+- Set effective date if the content ``review_state`` is ``published``
+  [sneridagh]
 
 3.0.0 (2021-11-10)
 ------------------

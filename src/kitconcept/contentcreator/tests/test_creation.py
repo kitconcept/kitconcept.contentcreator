@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from kitconcept.contentcreator.creator import create_item_runner
+from DateTime import DateTime
 from kitconcept.contentcreator.creator import content_creator_from_folder
+from kitconcept.contentcreator.creator import create_item_runner
 from kitconcept.contentcreator.creator import load_json
 from kitconcept.contentcreator.creator import refresh_objects_created_by_structure
 from kitconcept.contentcreator.testing import (
@@ -281,3 +282,19 @@ class CreatorTestCase(unittest.TestCase):
             )
 
         self.assertEqual(self.portal["a-folder"].description, "")
+
+    def test_effective_date_is_set_if_review_state_published(self):
+        content_structure = load_json("test_content.json", __file__)
+
+        self.portal.invokeFactory("Folder", "a-folder")
+        self.assertIn("a-folder", self.portal.objectIds())
+
+        with api.env.adopt_roles(["Manager"]):
+            create_item_runner(
+                self.portal,
+                content_structure,
+                default_lang="en",
+                default_wf_state="published",
+            )
+
+        self.assertTrue(self.portal["a-folder"].effective() < DateTime())
