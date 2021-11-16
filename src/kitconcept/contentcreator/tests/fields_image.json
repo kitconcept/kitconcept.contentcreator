@@ -17,6 +17,12 @@
   "set_dummy_image": ["image"]
 },
 {
+  "id": "image.svg",
+  "@type": "Image",
+  "title": "SVG Test Image",
+  "set_local_image": {"image": "image.svg"}
+},
+{
   "id": "another-image",
   "@type": "Image",
   "title": "Another Test Image",
