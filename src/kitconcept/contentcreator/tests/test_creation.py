@@ -78,6 +78,11 @@ class CreatorTestCase(unittest.TestCase):
         self.assertTrue(self.portal["another-image"].image.filename, "image.png")
         self.assertTrue(self.portal["another-image"].image.contentType, "image/png")
 
+        self.assertIn("image-svg", self.portal.objectIds())
+        self.assertTrue(self.portal["image-svg"].image)
+        self.assertTrue(self.portal["image-svg"].image.filename, "image.svg")
+        self.assertTrue(self.portal["image-svg"].image.contentType, "image/svg")
+
         self.assertIn("news-item-image", self.portal.objectIds())
         self.assertTrue(self.portal["news-item-image"].image)
         self.assertTrue(self.portal["news-item-image"].image.filename, "image.png")
