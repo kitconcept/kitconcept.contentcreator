@@ -7,6 +7,12 @@ Changelog
 - Use debug log level when generating image scales
   [timo]
 
+- Make log messages more consistent
+  [timo]
+
+- Do not use colors for info messages
+  [timo]
+
 
 3.0.1 (2021-11-11)
 ------------------
