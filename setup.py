@@ -16,7 +16,7 @@ long_description = "\n\n".join(
 
 setup(
     name="kitconcept.contentcreator",
-    version="3.0.2",
+    version="3.0.3.dev0",
     description="Create Plone content via JSON",
     long_description=long_description,
     # Get more from https://pypi.python.org/pypi?%3Aaction=list_classifiers
