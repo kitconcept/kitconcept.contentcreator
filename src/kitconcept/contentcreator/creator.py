@@ -106,8 +106,8 @@ def add_criterion(topic, index, criterion, value=None):
 
     # TODO: Add extra parameter to the criterion creation for these criterion types
     if criterion == "ATDateRangeCriterion":
-        crit.setStart(u"2019/02/20 13:55:00 GMT-3")
-        crit.setEnd(u"2019/02/22 13:55:00 GMT-3")
+        crit.setStart("2019/02/20 13:55:00 GMT-3")
+        crit.setEnd("2019/02/22 13:55:00 GMT-3")
     elif criterion == "ATSortCriterion":
         crit.setReversed(True)
     elif criterion == "ATBooleanCriterion":
@@ -184,7 +184,7 @@ def create_object(path, is_folder=False):
     else:
         parent = create_object(path_parent, is_folder=True)
 
-    logger.info(f'{path} - create')
+    logger.info(f"{path} - create")
 
     obj = api.content.create(
         container=parent, type="Folder" if is_folder else "Document", id=obj_id
@@ -514,8 +514,7 @@ def create_item_runner(  # noqa
                 for image_fieldname in image_fieldnames_added:
                     logger.debug(
                         "{} - generating image scales for {} field".format(
-                            "/".join(obj.getPhysicalPath()),
-                            image_fieldname,
+                            "/".join(obj.getPhysicalPath()), image_fieldname
                         )
                     )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
