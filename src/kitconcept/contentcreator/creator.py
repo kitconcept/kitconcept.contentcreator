@@ -76,11 +76,6 @@ def print_error(error_string):  # RED
     logger.error("{}".format(error_string))
 
 
-def print_info(info_string):  # GREEN
-    print("\033[33m{}\033[0m".format(info_string))
-    logger.info("{}".format(info_string))
-
-
 def load_json(path, base_path=None):
     """Load JSON from a file.
 
@@ -516,11 +511,11 @@ def create_item_runner(  # noqa
                     notify(ObjectCreatedEvent(obj))
 
                 obj = add(container, obj, rename=not bool(id_))
-                obj_path = "/".join(obj.getPhysicalPath())
                 for image_fieldname in image_fieldnames_added:
-                    print_info(
-                        "Generating image scales for {} field in {}".format(
-                            image_fieldname, obj_path
+                    logger.debug(
+                        "{} (generating image scales for {} field".format(
+                            "/".join(obj.getPhysicalPath()),
+                            image_fieldname,
                         )
                     )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
@@ -801,7 +796,7 @@ def content_creator_from_folder(
         # structure
         if file_ == "content.json":
             has_content_json = True
-            print_info("content.json file found, creating content")
+            logger.info("content.json file found, creating content")
             content_structure = load_json(os.path.join(folder, "content.json"))
             create_item_runner(
                 api.portal.get(),
@@ -815,7 +810,7 @@ def content_creator_from_folder(
             )
             continue
         elif file_ == "siteroot.json":
-            print_info("Site root info found, applying changes")
+            logger.info("Site root info found, applying changes")
             root_info = load_json(os.path.join(folder, "siteroot.json"))
             modify_siteroot(root_info)
             continue
@@ -857,12 +852,12 @@ def content_creator_from_folder(
 
     # After creation, we refresh all the content created to update resolveuids
     if len(files) > 0:
-        print_info("Refreshing content serialization after creation...")
+        logger.info("Refreshing content serialization after creation...")
     for file_ in files:
         filepath = os.path.join(folder, file_)
         refresh_objects_created_by_file(filepath, file_)
     if has_content_json:
-        print_info(
+        logger.info(
             "Refreshing structured (content.json) content serialization after creation..."
         )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)

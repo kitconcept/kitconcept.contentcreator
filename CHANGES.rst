@@ -4,7 +4,8 @@ Changelog
 3.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use debug log level when generating image scales
+  [timo]
 
 
 3.0.1 (2021-11-11)
@@ -12,6 +13,7 @@ Changelog
 
 - Add classifiers to setup.py for Python 3.8, 3.9 and maturity.
   [timo]
+
 - Set effective date if the content ``review_state`` is ``published``
   [sneridagh]
 
