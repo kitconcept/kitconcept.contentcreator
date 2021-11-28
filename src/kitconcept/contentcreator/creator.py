@@ -184,7 +184,7 @@ def create_object(path, is_folder=False):
     else:
         parent = create_object(path_parent, is_folder=True)
 
-    logger.info('Creating "{0}"'.format(path))
+    logger.info(f'{path} - create')
 
     obj = api.content.create(
         container=parent, type="Folder" if is_folder else "Document", id=obj_id
@@ -513,7 +513,7 @@ def create_item_runner(  # noqa
                 obj = add(container, obj, rename=not bool(id_))
                 for image_fieldname in image_fieldnames_added:
                     logger.debug(
-                        "{} (generating image scales for {} field".format(
+                        "{} - generating image scales for {} field".format(
                             "/".join(obj.getPhysicalPath()),
                             image_fieldname,
                         )
@@ -559,9 +559,9 @@ def create_item_runner(  # noqa
             path = "/".join(obj.getPhysicalPath())
 
             if create_object:
-                logger.info("{0}: created".format(path))
+                logger.info(f"{path} - created")
             else:
-                logger.info("{0}: edited".format(path))
+                logger.info(f"{path} - edited")
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
@@ -575,7 +575,7 @@ def create_item_runner(  # noqa
                     if locally_allowed_types:
                         be.setLocallyAllowedTypes = locally_allowed_types
                         logger.warn(
-                            "{0}: locally_allowed_types {1}".format(
+                            "{0} - locally_allowed_types {1}".format(
                                 path, locally_allowed_types
                             )
                         )  # noqa
@@ -584,7 +584,7 @@ def create_item_runner(  # noqa
                             immediately_allowed_types  # noqa
                         )
                         logger.warn(
-                            "{0}: immediately_allowed_types {1}".format(
+                            "{0} - immediately_allowed_types {1}".format(
                                 path, immediately_allowed_types
                             )
                         )  # noqa
