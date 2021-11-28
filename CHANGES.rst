@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.2 (unreleased)
+3.0.2 (2021-11-28)
 ------------------
 
 - Use debug log level when generating image scales
