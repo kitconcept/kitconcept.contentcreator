@@ -53,7 +53,43 @@ try:
 except ImportError:
     get_installer = None
 
+
+class CustomFormatter(logging.Formatter):
+
+    grey = "\x1b[38;21m"
+    yellow = "\x1b[33;21m"
+    green = "\u001b[32m"
+    blue = "\u001b[34m"
+    magenta = "\u001b[35m"
+    cyan = "\u001b[36m"
+    red = "\x1b[31;21m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    format = "%(asctime)s - %(levelname)s - %(message)s"
+    # format = "%(asctime)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+
+    FORMATS = {
+        logging.DEBUG: green + format + reset,
+        logging.INFO: grey + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: bold_red + format + reset,
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
 logger = logging.getLogger("kitconcept.contentcreator")
+# This prevents that the log propagates to the root logger set by Zope
+logger.propagate = False
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(CustomFormatter())
+logger.addHandler(ch)
 
 # Removing description block from the creator, bring it back parameterized if
 # required
@@ -69,11 +105,6 @@ DEFAULT_BLOCKS_LAYOUT = {
         "7624cf59-05d0-4055-8f55-5fd6597d84b0",
     ]
 }
-
-
-def print_error(error_string):  # RED
-    print("\033[31mERROR: {}\033[0m".format(error_string))
-    logger.error("{}".format(error_string))
 
 
 def load_json(path, base_path=None):
@@ -279,7 +310,7 @@ def create_item_runner(  # noqa
                 obj = create(container, type_, id_=id_, title=title)
                 create_object = True
             except Exception as e:
-                print_error(
+                logger.error(
                     "Can not create object {} ({}) in {}, because of {}".format(
                         id_, type_, "/".join(container.getPhysicalPath()), e
                     )
@@ -304,7 +335,7 @@ def create_item_runner(  # noqa
             deserializer = queryMultiAdapter((obj, request), IDeserializeFromJson)
 
             if deserializer is None:
-                print_error("Cannot deserialize type {}".format(obj.portal_type))
+                logger.error("Cannot deserialize type {}".format(obj.portal_type))
                 continue
 
             # defaults
@@ -600,7 +631,7 @@ def create_item_runner(  # noqa
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
             message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'
-            print_error(message.format(type_, container_path, id_, title, e))
+            logger.error(message.format(type_, container_path, id_, title, e))
             continue
 
         # Call recursively
@@ -672,7 +703,7 @@ def refresh_objects_created_by_structure(container, content_structure):
         if not id_:
             obj = get_content_by_data(data, container)
             if not obj:
-                print_error(
+                logger.error(
                     "id can't be guessed for {0} in container {1}".format(
                         "/".join(container.getPhysicalPath()), data["title"]
                     )
@@ -716,7 +747,7 @@ def refresh_objects_created_by_file(filepath, file_):
     try:
         container = api.content.get(path=path)
     except NotFound:
-        print_error('Could not look up container under "{}"'.format(path))
+        logger.error('Could not look up container under "{}"'.format(path))
         return
 
     obj = container.get(id_, None)
@@ -795,7 +826,7 @@ def content_creator_from_folder(
         # structure
         if file_ == "content.json":
             has_content_json = True
-            logger.info("content.json file found, creating content")
+            logger.debug("content.json file found, creating content")
             content_structure = load_json(os.path.join(folder, "content.json"))
             create_item_runner(
                 api.portal.get(),
@@ -809,7 +840,7 @@ def content_creator_from_folder(
             )
             continue
         elif file_ == "siteroot.json":
-            logger.info("Site root info found, applying changes")
+            logger.debug("Site root info found, applying changes")
             root_info = load_json(os.path.join(folder, "siteroot.json"))
             modify_siteroot(root_info)
             continue
@@ -825,7 +856,7 @@ def content_creator_from_folder(
         try:
             container = api.content.get(path=path)
         except NotFound:
-            print_error('Could not look up container under "{}"'.format(path))
+            logger.error('Could not look up container under "{}"'.format(path))
         if container is None:
             container = create_object(path)
         try:
@@ -843,20 +874,20 @@ def content_creator_from_folder(
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
         except ValueError as e:
-            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
         except FileNotFoundError as e:
-            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
         except Exception as e:  # noqa
-            print_error('Error in file structure: "{0}": {1}'.format(filepath, e))
+            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     # After creation, we refresh all the content created to update resolveuids
     if len(files) > 0:
-        logger.info("Refreshing content serialization after creation...")
+        logger.debug("Refreshing content serialization after creation...")
     for file_ in files:
         filepath = os.path.join(folder, file_)
         refresh_objects_created_by_file(filepath, file_)
     if has_content_json:
-        logger.info(
+        logger.debug(
             "Refreshing structured (content.json) content serialization after creation..."
         )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)
