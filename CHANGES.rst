@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.3 (unreleased)
+3.1.0 (2021-12-03)
 ------------------
 
 - Use an improved logging infrasttructure
