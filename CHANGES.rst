@@ -4,8 +4,8 @@ Changelog
 3.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Use an improved logging infrasttructure
+  [sneridagh]
 
 3.0.2 (2021-11-28)
 ------------------
