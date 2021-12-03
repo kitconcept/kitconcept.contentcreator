@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.1.1 (unreleased)
+3.2.0 (2021-12-03)
 ------------------
 
 - Guess content id if missing, taking into account that the content might already be there.
