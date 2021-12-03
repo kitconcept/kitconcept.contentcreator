@@ -154,6 +154,8 @@ class CreatorTestCase(unittest.TestCase):
 
         self.portal.invokeFactory("Folder", "a-folder")
         self.assertIn("a-folder", self.portal.objectIds())
+        self.portal.invokeFactory("Folder", "a-folder-with-no-id")
+        self.assertIn("a-folder-with-no-id", self.portal.objectIds())
 
         with api.env.adopt_roles(["Manager"]):
             create_item_runner(
@@ -164,6 +166,9 @@ class CreatorTestCase(unittest.TestCase):
             )
 
         self.assertEqual(self.portal["a-folder"].description, "The description")
+        self.assertEqual(
+            self.portal["a-folder-with-no-id"].description, "The description edited"
+        )
 
     def test_content_from_folder(self):
         path = os.path.join(os.path.dirname(__file__), "content")

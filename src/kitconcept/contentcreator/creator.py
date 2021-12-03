@@ -224,6 +224,30 @@ def create_object(path, is_folder=False):
     return obj
 
 
+def guess_id(data, container):
+    type_ = data.get("@type", None)
+    id_ = data.get("id", None)
+    title = data.get("title", None)
+
+    obj = create(container, type_, id_=id_, title=title)
+    chooser = INameChooser(container)
+    # INameFromTitle adaptable objects should not get a name
+    # suggestion. NameChooser would prefer the given name instead of
+    # the one provided by the INameFromTitle adapter.
+    suggestion = None
+    name_from_title = INameFromTitle(obj, None)
+    if name_from_title is None:
+        suggestion = obj.Title()
+    id_ = chooser.chooseName(suggestion, obj)
+
+    # Case 1: Content exists and the chooser has answered an id_ ending in "-1"
+    if container.get(id_[:-2], False):
+        return id_[:-2]
+    # Case 2: Content does not exits and the chooser has guessed the correct id
+    else:
+        return id_
+
+
 def create_item_runner(  # noqa
     container,
     content_structure,
@@ -284,6 +308,9 @@ def create_item_runner(  # noqa
         type_ = data.get("@type", None)
         id_ = data.get("id", None)
         title = data.get("title", None)
+
+        if id_ is None:
+            id_ = guess_id(data, container)
 
         if not type_:
             logger.warn("Property '@type' is required")

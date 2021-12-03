@@ -4,7 +4,8 @@ Changelog
 3.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Guess content id if missing, taking into account that the content might already be there.
+  [sneridagh]
 
 
 3.1.0 (2021-12-03)
