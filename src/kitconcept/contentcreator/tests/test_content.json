@@ -5,5 +5,11 @@
     "title": "Test Folder",
     "description": "The description",
     "review_state": "published"
+  },
+  {
+    "@type": "Folder",
+    "title": "A Folder with no id",
+    "description": "The description edited",
+    "review_state": "published"
   }
 ]

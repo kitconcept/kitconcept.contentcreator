@@ -240,14 +240,12 @@ def guess_id(data, container):
         suggestion = obj.Title()
     id_ = chooser.chooseName(suggestion, obj)
 
-    # Lookup for first guess to exist
-    if container.get(id_, False):
-        return id_
-    # Lookup for second guess to exist (id_ minus "-1")
-    elif container.get(id_[:-2], False):
+    # Case 1: Content exists and the chooser has answered an id_ ending in "-1"
+    if container.get(id_[:-2], False):
         return id_[:-2]
+    # Case 2: Content does not exits and the chooser has guessed the correct id
     else:
-        return None
+        return id_
 
 
 def create_item_runner(  # noqa
