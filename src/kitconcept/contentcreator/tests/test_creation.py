@@ -186,7 +186,9 @@ class CreatorTestCase(unittest.TestCase):
         path = os.path.join(os.path.dirname(__file__), "content")
 
         with api.env.adopt_roles(["Manager"]):
-            content_creator_from_folder(folder_name=path, exclude=['a-folder.a-document-1'])
+            content_creator_from_folder(
+                folder_name=path, exclude=["a-folder.a-document-1"]
+            )
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
