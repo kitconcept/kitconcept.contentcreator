@@ -793,7 +793,7 @@ def content_creator_from_folder(
     temp_enable_content_types=[],
     custom_order=[],
     do_not_edit_if_modified_after=None,
-    exclude=[]
+    exclude=[],
 ):
     """
     Main entry point for the content creator. It allows to have a structure like:
@@ -845,7 +845,11 @@ def content_creator_from_folder(
             item.lower(),  # Than alphabetically
         )
 
-    files = [filename for filename in sorted(os.listdir(folder), key=sort_key) if not filename.startswith(tuple(exclude))]
+    files = [
+        filename
+        for filename in sorted(os.listdir(folder), key=sort_key)
+        if not filename.startswith(tuple(exclude))
+    ]
     has_content_json = False
     # has_siteroot_json = False
 
