@@ -4,7 +4,15 @@ Changelog
 3.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+FEATURE:
+
+- Add ability to exclude files from the file list (content_creator_from_folder)
+  [sneridagh]
+
+INTERNAL:
+
+- Move to latest 5.2.6 build
+  [sneridagh]
 
 
 3.2.0 (2021-12-03)
