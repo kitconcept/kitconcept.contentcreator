@@ -4,7 +4,10 @@ Changelog
 3.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+Breaking:
+
+- Remove support for Archetypes and Python 2.
+  [sneridagh]
 
 
 3.3.0 (2022-01-11)

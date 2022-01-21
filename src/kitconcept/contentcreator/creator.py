@@ -2,13 +2,11 @@
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from kitconcept.contentcreator.dummy_image import generate_image
-from OFS.Image import Image
 from plone import api
 from plone.app.dexterity import behaviors
 from plone.dexterity.interfaces import IDexterityContent
 from plone.namedfile.file import NamedBlobFile
 from plone.namedfile.file import NamedBlobImage
-from plone.portlets.interfaces import IPortletAssignmentSettings
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
@@ -36,16 +34,6 @@ import json
 import logging
 import magic
 import os
-import pkg_resources
-
-
-try:
-    pkg_resources.get_distribution("Products.Archetypes")
-    from Products.Archetypes.interfaces import IBaseObject
-
-    ARCHETYPES_PRESENT = True
-except pkg_resources.DistributionNotFound:  # pragma: no restapi
-    ARCHETYPES_PRESENT = False
 
 
 try:
@@ -91,17 +79,13 @@ ch.setLevel(logging.DEBUG)
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
-# Removing description block from the creator, bring it back parameterized if
-# required
 DEFAULT_BLOCKS = {
     "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
-    # "35240ad8-3625-4611-b76f-03471bcf6b34": {"@type": "description"},
     "7624cf59-05d0-4055-8f55-5fd6597d84b0": {"@type": "slate"},
 }
 DEFAULT_BLOCKS_LAYOUT = {
     "items": [
         "d3f1c443-583f-4e8e-a682-3bf25752a300",
-        # "35240ad8-3625-4611-b76f-03471bcf6b34",
         "7624cf59-05d0-4055-8f55-5fd6597d84b0",
     ]
 }
@@ -126,52 +110,6 @@ def load_json(path, base_path=None):
         content_json = json.loads(file_handle.read())
 
     return content_json
-
-
-def add_criterion(topic, index, criterion, value=None):
-    index = index.encode("utf-8")
-    criterion = criterion.encode("utf-8")
-    name = "{0}_{1}".format(index, criterion)
-    topic.addCriterion(index, criterion)
-    crit = topic.getCriterion(name)
-
-    # TODO: Add extra parameter to the criterion creation for these criterion types
-    if criterion == "ATDateRangeCriterion":
-        crit.setStart("2019/02/20 13:55:00 GMT-3")
-        crit.setEnd("2019/02/22 13:55:00 GMT-3")
-    elif criterion == "ATSortCriterion":
-        crit.setReversed(True)
-    elif criterion == "ATBooleanCriterion":
-        crit.setBool(True)
-
-    if value is not None:
-        crit.setValue(value)
-
-
-def create_portlets(obj, portlets):
-    if not portlets:
-        return
-
-    # Avoid portlet duplication
-    for manager_name in portlets:
-        mapping = obj.restrictedTraverse("++contextportlets++{0}".format(manager_name))
-        for m in mapping.keys():
-            del mapping[m]
-    # Avoid portlet duplication
-
-    for manager_name in portlets:
-        for data in portlets[manager_name]:
-            mapping = obj.restrictedTraverse(
-                "++contextportlets++{0}".format(manager_name)
-            )
-            addview = mapping.restrictedTraverse("+/{0}".format(data["type"]))
-            if getattr(addview, "createAndAdd", False):
-                addview.createAndAdd(data=data["assignment"])
-            else:  # Some portlets don't have assignment
-                addview.create()
-            assignment = list(mapping.values())[-1]
-            settings = IPortletAssignmentSettings(assignment)
-            settings["visible"] = data["visible"]
 
 
 def set_exclude_from_nav(obj):
@@ -304,6 +242,9 @@ def create_item_runner(  # noqa
     request = getRequest()
     portal = api.portal.get()
 
+    DEBUG = os.environ.get("CREATOR_DEBUG")
+    CONTINUE_ON_ERROR = os.environ.get("CREATOR_CONTINUE_ON_ERROR")
+
     for data in content_structure:
         type_ = data.get("@type", None)
         id_ = data.get("id", None)
@@ -314,17 +255,6 @@ def create_item_runner(  # noqa
 
         if not type_:
             logger.warn("Property '@type' is required")
-            continue
-
-        if container.portal_type == "Topic":
-            field = data.get("field", None)
-            value = data.get("value", None)
-            add_criterion(container, field, type_, value)
-            continue
-
-        # PFG
-        if type_ in ["FormSelectionField", "FormMultiSelectionField"]:
-            container.fgVocabulary = data.get("fgVocabulary", [])
             continue
 
         create_object = False
@@ -404,29 +334,6 @@ def create_item_runner(  # noqa
             get_file_type = magic.Magic(mime=True)
             # Populate image if any
             image_fieldnames_added = []
-            if ARCHETYPES_PRESENT and IBaseObject.providedBy(obj):
-                if data.get("set_dummy_image", False):
-                    new_file = BytesIO()
-                    generate_image().save(new_file, "png")
-                    obj.setImage(Image("test.png", "test.png", new_file))
-                if data.get("set_local_image", False):
-                    new_file = open(
-                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
-                    )
-                    obj.setImage(new_file.read())
-                if data.get("set_dummy_file", False):
-                    new_file = BytesIO()
-                    generate_image().save(new_file, "png")
-                    obj.setFilename("test.png")
-                    obj.setFile(new_file)
-                    obj.setFormat("image/png")
-                if data.get("set_local_file", False):
-                    new_file = open(
-                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
-                    )
-                    obj.setFilename(os.path.basename(data.get("set_local_image")))
-                    obj.setFile(new_file.read())
-                    obj.setFormat("image/png")
 
             if IDexterityContent.providedBy(obj):
                 if data.get("set_dummy_image", False) and isinstance(
@@ -578,17 +485,9 @@ def create_item_runner(  # noqa
                     plone_scale_generate_on_save(obj, request, image_fieldname)
 
             # Set UUID - TODO: add to p.restapi
-            if (
-                data.get("UID", False)
-                and ARCHETYPES_PRESENT
-                and IBaseObject.providedBy(obj)
-            ):
-                obj._setUID(data.get("UID"))
+            if data.get("UID"):
+                setattr(obj, "_plone.uuid", data.get("UID"))
                 obj.reindexObject(idxs=["UID"])
-            else:
-                if data.get("UID"):
-                    setattr(obj, "_plone.uuid", data.get("UID"))
-                    obj.reindexObject(idxs=["UID"])
 
             # Set workflow
             if (
@@ -646,8 +545,6 @@ def create_item_runner(  # noqa
                             )
                         )  # noqa
 
-            create_portlets(obj, data.get("portlets", []))
-
             # create local roles
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
@@ -657,9 +554,15 @@ def create_item_runner(  # noqa
 
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())
-            message = 'Could not edit the fields and properties for (type: "{0}", container: "{1}", id: "{2}", title: "{3}") exception: {4}'
-            logger.error(message.format(type_, container_path, id_, title, e))
-            continue
+            message = f'Could not edit the fields and properties for object {container_path}/{id_} (type: "{type_}", container: "{container_path}", id: "{id_}", title: "{title}") because: {e}'
+            logger.error(message)
+            if CONTINUE_ON_ERROR:
+                continue
+            if DEBUG:
+                import pdb
+
+                pdb.set_trace()
+            raise
 
         # Call recursively
         create_item_runner(
@@ -908,8 +811,6 @@ def content_creator_from_folder(
         except ValueError as e:
             logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
         except FileNotFoundError as e:
-            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
-        except Exception as e:  # noqa
             logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     # After creation, we refresh all the content created to update resolveuids
