@@ -45,7 +45,6 @@ setup(
     zip_safe=False,
     install_requires=[
         "plone.api",
-        "plone.portlets",
         "plone.restapi>=7.5.0",  # for resolveuid for links and transformer support
         "Products.GenericSetup",
         "setuptools",

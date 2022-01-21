@@ -4,8 +4,15 @@ Changelog
 3.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+Breaking:
 
+- Remove support for Archetypes and Python 2.
+  [sneridagh]
+
+- Refactor the creator to break by default. Added a scapehatch to not to break and for
+  open a debug session on fail via ``CREATOR_DEBUG`` and ``CREATOR_CONTINUE_ON_ERROR``
+  environment variables.
+  [sneridagh]
 
 3.3.0 (2022-01-11)
 ------------------
