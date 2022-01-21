@@ -1,38 +1,32 @@
 # -*- coding: utf-8 -*-
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
-from kitconcept.contentcreator.dummy_image import generate_image
-from plone import api
-from plone.app.dexterity import behaviors
-from plone.dexterity.interfaces import IDexterityContent
-from plone.namedfile.file import NamedBlobFile
-from plone.namedfile.file import NamedBlobImage
-from Products.CMFCore.utils import getToolByName
-from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
-from Products.CMFPlone.utils import safe_hasattr
-from six import BytesIO
-from six import MAXSIZE
-from zope.component import queryMultiAdapter
-from zope.event import notify
-from zope.globalrequest import getRequest
-from zope.lifecycleevent import ObjectCreatedEvent
-from zExceptions import NotFound
-from kitconcept.contentcreator.scales import plone_scale_generate_on_save
-from plone.restapi.behaviors import IBlocks
-from plone.app.content.interfaces import INameFromTitle
-from zope.container.interfaces import INameChooser
 from DateTime import DateTime
-
-from plone.restapi.interfaces import IDeserializeFromJson
-from zope.component import getMultiAdapter
+from kitconcept.contentcreator.images import process_local_images
+from kitconcept.contentcreator.scales import plone_scale_generate_on_save
+from plone import api
+from plone.app.content.interfaces import INameFromTitle
+from plone.app.dexterity import behaviors
 from plone.dexterity.utils import iterSchemata
+from plone.restapi.behaviors import IBlocks
+from plone.restapi.interfaces import IDeserializeFromJson
 from plone.restapi.interfaces import IFieldSerializer
 from plone.restapi.services.content.utils import add
 from plone.restapi.services.content.utils import create
+from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
+from Products.CMFPlone.utils import safe_hasattr
+from six import MAXSIZE
+from zExceptions import NotFound
+from zope.component import getMultiAdapter
+from zope.component import queryMultiAdapter
+from zope.container.interfaces import INameChooser
+from zope.event import notify
+from zope.globalrequest import getRequest
+from zope.lifecycleevent import ObjectCreatedEvent
 
 import json
 import logging
-import magic
 import os
 
 
@@ -190,7 +184,6 @@ def create_item_runner(  # noqa
     container,
     content_structure,
     base_image_path=os.path.dirname(__file__),
-    auto_id=False,
     default_lang=None,
     default_wf_state=None,
     ignore_wf_types=["Image", "File"],
@@ -295,7 +288,7 @@ def create_item_runner(  # noqa
                 logger.error("Cannot deserialize type {}".format(obj.portal_type))
                 continue
 
-            # defaults
+            # default language
             if not data.get("language"):
                 language_tool = api.portal.get_tool("portal_languages")
                 supported_langs = language_tool.getSupportedLanguages()
@@ -318,6 +311,7 @@ def create_item_runner(  # noqa
                     if not obj.language and default_lang:
                         data["language"] = default_lang
 
+            # Workflow
             if not data.get("review_state") and obj.portal_type not in ignore_wf_types:
                 data["review_state"] = default_wf_state
 
@@ -331,138 +325,8 @@ def create_item_runner(  # noqa
                 obj.blocks = DEFAULT_BLOCKS
                 obj.blocks_layout = DEFAULT_BLOCKS_LAYOUT
 
-            get_file_type = magic.Magic(mime=True)
             # Populate image if any
-            image_fieldnames_added = []
-
-            if IDexterityContent.providedBy(obj):
-                if data.get("set_dummy_image", False) and isinstance(
-                    data.get("set_dummy_image"), list
-                ):
-                    new_file = BytesIO()
-                    generate_image().save(new_file, "png")
-                    new_file = (
-                        new_file if type(new_file) == str else new_file.getvalue()
-                    )
-                    for image_field in data["set_dummy_image"]:
-                        setattr(
-                            obj,
-                            image_field,
-                            NamedBlobImage(data=new_file, contentType="image/png"),
-                        )
-
-                    image_fieldnames_added + data["set_dummy_image"]
-
-                elif data.get("set_dummy_image", False) and isinstance(
-                    data.get("set_dummy_image"), bool
-                ):
-                    # Legacy behavior, set_dummy_image is a boolean
-                    obj.image = NamedBlobImage(
-                        data=generate_image().tobytes(), contentType="image/png"
-                    )
-
-                    image_fieldnames_added.append("image")
-
-                if data.get("set_dummy_file", False) and isinstance(
-                    data.get("set_dummy_file"), list
-                ):
-                    new_file = BytesIO()
-                    generate_image().save(new_file, "png")
-                    new_file = (
-                        new_file if type(new_file) == str else new_file.getvalue()
-                    )
-                    for image_field in data["set_dummy_file"]:
-                        setattr(
-                            obj,
-                            image_field,
-                            NamedBlobFile(data=new_file, contentType="image/png"),
-                        )
-
-                elif data.get("set_dummy_file", False) and isinstance(
-                    data.get("set_dummy_file"), bool
-                ):
-                    # Legacy behavior, set_dummy_file is a boolean
-                    obj.file = NamedBlobFile(
-                        data=generate_image().tobytes(), contentType="image/png"
-                    )
-
-                if data.get("set_local_image", False) and isinstance(
-                    data.get("set_local_image"), dict
-                ):
-                    for image_data in data["set_local_image"].items():
-                        new_file = open(
-                            os.path.join(base_image_path, image_data[1]), "rb"
-                        )
-                        # Get the correct content-type
-                        content_type = get_file_type.from_buffer(new_file.read())
-                        new_file.seek(0)
-
-                        setattr(
-                            obj,
-                            image_data[0],
-                            NamedBlobImage(
-                                data=new_file.read(),
-                                filename=image_data[1],
-                                contentType=content_type,
-                            ),
-                        )
-
-                        image_fieldnames_added.append(image_data[0])
-
-                elif data.get("set_local_image", False) and isinstance(
-                    data.get("set_local_image"), str
-                ):
-                    new_file = open(
-                        os.path.join(base_image_path, data.get("set_local_image")), "rb"
-                    )
-                    # Get the correct content-type
-                    content_type = get_file_type.from_buffer(new_file.read())
-                    new_file.seek(0)
-
-                    obj.image = NamedBlobImage(
-                        data=new_file.read(),
-                        filename=data.get("set_local_image"),
-                        contentType=content_type,
-                    )
-
-                    image_fieldnames_added.append("image")
-
-                if data.get("set_local_file", False) and isinstance(
-                    data.get("set_local_file"), dict
-                ):
-                    for image_data in data["set_local_file"].items():
-                        new_file = open(
-                            os.path.join(base_image_path, image_data[1]), "rb"
-                        )
-                        # Get the correct content-type
-                        content_type = get_file_type.from_buffer(new_file.read())
-                        new_file.seek(0)
-
-                        setattr(
-                            obj,
-                            image_data[0],
-                            NamedBlobFile(
-                                data=new_file.read(),
-                                filename=image_data[1],
-                                contentType=content_type,
-                            ),
-                        )
-
-                elif data.get("set_local_file", False) and isinstance(
-                    data.get("set_local_file"), str
-                ):
-                    new_file = open(
-                        os.path.join(base_image_path, data.get("set_local_file")), "rb"
-                    )
-                    # Get the correct content-type
-                    content_type = get_file_type.from_buffer(new_file.read())
-                    new_file.seek(0)
-
-                    obj.file = NamedBlobFile(
-                        data=new_file.read(),
-                        filename=data.get("set_local_file"),
-                        contentType=content_type,
-                    )
+            image_fieldnames_added = process_local_images(data, obj, base_image_path)
 
             deserializer(validate_all=True, data=data, create=True)
 
@@ -501,7 +365,7 @@ def create_item_runner(  # noqa
                     # Side-effect if review_state is published, always set the effective date
                     obj.effective_date = DateTime()
 
-            # set default
+            # set additional defaults (from opts)
             opts = data.get("opts", {})
             if opts.get("default_page", False):
                 container.setDefaultPage(obj.id)
