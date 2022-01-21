@@ -61,7 +61,18 @@ the method ``content_creator_from_folder`` has the following signature::
     logger=logger,
     temp_enable_content_types=[],
     custom_order=[],
+    do_not_edit_if_modified_after=None,
+    exclude=[],
   ):
+
+The creator will bail out (raise) if any object errors on creation (or edition). There are
+a couple of environment variables to control this behavior: ``CREATOR_DEBUG`` and
+``CREATOR_CONTINUE_ON_ERROR``.
+
+One can exclude elements (ids, without .json sufix) using the ``exclude`` kwargs.
+
+You can control if the edit should happen or not for a given element providing the modified date
+of the element is after the one specified in ``do_not_edit_if_modified_after`` kwargs.
 
 Creator runner given a single file
 ----------------------------------
