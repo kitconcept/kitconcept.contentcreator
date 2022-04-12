@@ -27,7 +27,7 @@ jobs:
       - name: Install tools
         run: pip install -r requirements/code-quality.txt
 
-      - name: Check flake8
+      - name: Check zpretty
         run: |
-          find src/ -name *.zcml | xargs zpretty -i -z --check
-	        find src/ -name *.xml | xargs zpretty -i -x --check
+          (find src/ -name *.zcml | xargs zpretty -i -z --check)
+          (find src/ -name *.xml | xargs zpretty -i -x --check)

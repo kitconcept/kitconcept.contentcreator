@@ -13,9 +13,7 @@ jobs:
           - "5.2.7"
           - "6.0.0a4"
         exclude:
-          - plone: "5.2.6"
-            python: 3.9
-          - plone: "5.2.5"
+          - plone: "5.2.7"
             python: 3.9
     steps:
       # git checkout
