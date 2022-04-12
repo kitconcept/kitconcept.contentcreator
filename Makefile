@@ -92,8 +92,8 @@ lint-isort: bin/isort ## validate using isort
 
 .PHONY: lint-zpretty
 lint-zpretty: bin/zpretty ## validate ZCML/XML using zpretty
-	find $(PACKAGE_PATH) -name *.zcml| xargs -r ./bin/zpretty -i -z --check
-	find $(PACKAGE_PATH) -name *.xml| xargs -r ./bin/zpretty -i -x --check
+	find $(PACKAGE_PATH) -name "*.zcml" -print0| xargs -0 -r ./bin/zpretty -i -z --check
+	find $(PACKAGE_PATH) -name "*.xml" -print0| xargs -0 -r ./bin/zpretty -i -x --check
 
 .PHONY: test
 test: ## run tests

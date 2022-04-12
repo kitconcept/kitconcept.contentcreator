@@ -1,0 +1,15 @@
+name: Code Analysis
+on: [push]
+jobs:
+
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v2
+
+      - name: Checkout codebase
+        uses: kitconcept/code-analysis-action@v1
+        with:
+          check: 'black'
+          path: 'src setup.py'
