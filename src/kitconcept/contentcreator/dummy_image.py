@@ -13,7 +13,7 @@ def generate_image(width=400, height=300):
         outline=(255, 255, 255),
     )
 
-    text = u"{} x {}".format(width, height)
+    text = "{} x {}".format(width, height)
     font = ImageFont.truetype(
         os.path.join(os.path.dirname(__file__), "Poppins-Regular.ttf"), 20
     )

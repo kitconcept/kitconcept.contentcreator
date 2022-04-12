@@ -1,9 +1,9 @@
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from DateTime import DateTime
+from kitconcept import api
 from kitconcept.contentcreator.images import process_local_images
 from kitconcept.contentcreator.scales import plone_scale_generate_on_save
-from kitconcept import api
 from plone.app.content.interfaces import INameFromTitle
 from plone.app.dexterity import behaviors
 from plone.dexterity.utils import iterSchemata
@@ -15,7 +15,7 @@ from plone.restapi.services.content.utils import create
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
-from sys import MAXSIZE
+from sys import maxsize
 from zExceptions import NotFound
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
@@ -287,9 +287,10 @@ def create_item_runner(  # noqa
                 supported_langs = language_tool.getSupportedLanguages()
 
                 if (
-                    "plone.app.multilingual", api.addon.get_addons_ids("installed")
+                    "plone.app.multilingual",
+                    api.addon.get_addons_ids("installed")
                     and len(supported_langs) > 1
-                    and not obj.language
+                    and not obj.language,
                 ):
                     # If pam, supported langs are two or more, and obj has no language set
                     # get language from path and set it
@@ -596,7 +597,7 @@ def content_creator_from_folder(
             len(item.split(".")[:-1]),  # First folders
             custom_order.index(item)
             if item in custom_order
-            else MAXSIZE,  # Custom order
+            else maxsize,  # Custom order
             item.lower(),  # Than alphabetically
         )
 

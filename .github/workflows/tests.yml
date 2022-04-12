@@ -13,7 +13,7 @@ jobs:
         plone:
           - "5.2.5"
           - "5.2.6"
-          - "6.0.0a4"
+          - "6.0.0a3"
         exclude:
           - plone: "5.2.6"
             python: 3.9
