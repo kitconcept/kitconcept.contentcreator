@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from kitconcept.contentcreator.interfaces import ICreateTestContent
 from kitconcept.contentcreator.testing import CONTENTCREATOR_CORE_INTEGRATION_TESTING
-from plone import api
+from kitconcept import api
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from zope.component import adapter
 from zope.component import getAdapters

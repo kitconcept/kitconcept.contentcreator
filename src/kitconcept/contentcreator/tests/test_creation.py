@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from DateTime import DateTime
 from kitconcept.contentcreator.creator import content_creator_from_folder
 from kitconcept.contentcreator.creator import create_item_runner
@@ -7,7 +6,7 @@ from kitconcept.contentcreator.creator import refresh_objects_created_by_structu
 from kitconcept.contentcreator.testing import (
     CONTENTCREATOR_CORE_INTEGRATION_TESTING,
 )  # noqa
-from plone import api
+from kitconcept import api
 from plone.app.testing import applyProfile
 
 import json

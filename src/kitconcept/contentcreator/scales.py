@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from ZODB.POSException import ConflictError
 from zope.component import getMultiAdapter
 from zope.component import getUtility

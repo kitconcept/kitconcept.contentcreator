@@ -1,7 +1,7 @@
+from io import BytesIO
 from kitconcept.contentcreator.dummy_image import generate_image
 from plone.namedfile.file import NamedBlobFile
 from plone.namedfile.file import NamedBlobImage
-from six import BytesIO
 
 import magic
 import os
