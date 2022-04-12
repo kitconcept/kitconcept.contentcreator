@@ -30,6 +30,7 @@ jobs:
 
       - name: Install package
         run: |
+          pip install "plone.app.testing" -c https://dist.plone.org/release/${{ matrix.plone }}/constraints.txt
           pip install -e ".[test]"
       - name: Run tests
         run: |
