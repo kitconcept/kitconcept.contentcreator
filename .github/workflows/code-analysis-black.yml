@@ -1,5 +1,5 @@
 
-name: Flake8
+name: Black
 on: [push]
 jobs:
   build:
@@ -10,26 +10,22 @@ jobs:
         python-version: [3.8]
 
     steps:
-      # git checkout
       - uses: actions/checkout@v2
 
-      # python setup
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
 
-      # python cache
       - uses: actions/cache@v1
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/code-quality.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      # install flake8
-      - name: install flake8
-        run: pip install flakeheaven
 
-      # run black
-      - name: run flake8
-        run: flakeheaven lint src/ setup.py
+      - name: Install tools
+        run: pip install requirements/code-quality.txt
+
+      - name: Check black
+        run: black src/ setup.py --check --diff
