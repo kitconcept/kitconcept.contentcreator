@@ -13,6 +13,7 @@ jobs:
         plone:
           - "5.2.5"
           - "5.2.6"
+          - "6.0.0a4"
         exclude:
           - plone: "5.2.6"
             python: 3.9
@@ -30,7 +31,7 @@ jobs:
 
       - name: Install package
         run: |
-          pip install -e ".[test]" --use-deprecated legacy-resolver
+          pip install -e ".[test]"
       - name: Run tests
         run: |
           PYTHONWARNINGS=ignore zope-testrunner --auto-color --auto-progress --test-path src/
