@@ -8,6 +8,12 @@ jobs:
       - name: Checkout codebase
         uses: actions/checkout@v2
 
+      - name: list
+        uses: kitconcept/code-analysis-action@main
+        with:
+          check: 'ls'
+          path: '/github'
+
       - name: Check
         uses: kitconcept/code-analysis-action@main
         with:
