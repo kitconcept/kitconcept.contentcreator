@@ -1,0 +1,40 @@
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
+
+[tool.isort]
+force_alphabetical_sort = true
+force_single_line = true
+lines_after_imports = 2
+line_length = 88
+
+[tool.flakeheaven]
+format = "grouped"
+max_line_length = 88
+show_source = true
+ignore = [
+  "E203", "E266", "E501", "W503"
+]
+max-complexity = 25
+select = ["B","C","E","F","W","T4","B9"]
+
+[tool.flakeheaven.plugins]
+"flake8-*" = ["+*"]

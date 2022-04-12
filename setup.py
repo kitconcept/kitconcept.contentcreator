@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Installer for the kitconcept.contentcreator package."""
 
 from setuptools import find_packages
@@ -27,7 +26,6 @@ setup(
         "Framework :: Plone :: 6.0",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
@@ -45,7 +43,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "plone.api",
+        "kitconcept.api",
         "plone.restapi>=7.5.0",  # for resolveuid for links and transformer support
         "Products.GenericSetup",
         "setuptools",

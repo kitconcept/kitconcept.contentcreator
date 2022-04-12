@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 from ZODB.POSException import ConflictError
 from zope.component import getMultiAdapter
 from zope.component import getUtility
 
 import logging
 import transaction
+
 
 try:
     from Products.CMFPlone.factory import _IMREALLYPLONE5  # noqa

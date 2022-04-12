@@ -4,8 +4,14 @@ Changelog
 4.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Include kitconcept.api as dependency
+  [ericof]
 
+- Drop support for Python 3.7
+  [ericof]
+
+- Remove buildout
+  [ericof]
 
 4.0.0 (2022-01-21)
 ------------------
