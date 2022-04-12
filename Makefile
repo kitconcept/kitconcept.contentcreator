@@ -31,7 +31,7 @@ help: ## This help message
 bin/pip:
 	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
 	python3 -m venv .
-	bin/pip install -U pip
+	bin/pip install -U pip wheel
 
 bin/black:
 	bin/pip install black
