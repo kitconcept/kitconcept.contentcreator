@@ -287,8 +287,7 @@ def create_item_runner(  # noqa
                 supported_langs = language_tool.getSupportedLanguages()
 
                 if (
-                    "plone.app.multilingual",
-                    api.addon.get_addons_ids("installed")
+                    "plone.app.multilingual" in api.addon.get_addons_ids("installed")
                     and len(supported_langs) > 1
                     and not obj.language,
                 ):
