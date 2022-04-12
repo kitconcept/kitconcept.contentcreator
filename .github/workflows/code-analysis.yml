@@ -18,4 +18,6 @@ jobs:
         uses: kitconcept/code-analysis-action@main
         with:
           check: 'black'
-          path: 'src setup.py'
+          path: |
+            src
+            setup.py
