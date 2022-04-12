@@ -1,5 +1,5 @@
 
-name: ZPretty
+name: Code Analysis - ZPretty
 on: [push]
 jobs:
   build:

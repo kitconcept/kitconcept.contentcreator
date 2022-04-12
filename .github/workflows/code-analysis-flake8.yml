@@ -1,5 +1,4 @@
-
-name: Flake8
+name: Code Analysis - Flake8
 on: [push]
 jobs:
   build:

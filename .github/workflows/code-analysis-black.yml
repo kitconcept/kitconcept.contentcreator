@@ -1,5 +1,5 @@
 
-name: Black
+name: Code Analysis - Black
 on: [push]
 jobs:
   build:

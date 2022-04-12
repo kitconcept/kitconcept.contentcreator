@@ -1,5 +1,5 @@
 
-name: iSort
+name: Code Analysis - iSort
 on: [push]
 jobs:
   build:
