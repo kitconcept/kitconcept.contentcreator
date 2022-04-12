@@ -29,5 +29,5 @@ jobs:
 
       - name: Check zpretty
         run: |
-          (find src/ -name *.zcml | xargs zpretty -i -z --check)
-          (find src/ -name *.xml | xargs zpretty -i -x --check)
+          (find src/ -name *.zcml | xargs zpretty -r -i -z --check)
+          (find src/ -name *.xml | xargs zpretty -r -i -x --check)
