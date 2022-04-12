@@ -8,8 +8,8 @@ jobs:
       - name: Checkout codebase
         uses: actions/checkout@v2
 
-      - name: Checkout codebase
-        uses: kitconcept/code-analysis-action@v1
+      - name: Check
+        uses: kitconcept/code-analysis-action@main
         with:
           check: 'black'
           path: 'src setup.py'
