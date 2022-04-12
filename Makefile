@@ -33,14 +33,9 @@ bin/pip:
 	python3 -m venv .
 	bin/pip install -U pip wheel
 
-bin/black:
-	bin/pip install black
 
-bin/isort:
-	bin/pip install isort
-
-bin/flakeheaven:
-	bin/pip install flakeheaven
+bin/black bin/flakeheaven bin/isort bin/pyroma bin/zpretty:
+	bin/pip install -r requirements/code-quality.txt
 
 .PHONY: build-plone-5.2
 build-plone-5.2: bin/pip ## Build Plone 5.2
@@ -72,16 +67,20 @@ black: bin/black ## Format codebase
 isort: bin/isort ## Format imports in the codebase
 	./bin/isort $(CHECK_PATH)
 
+.PHONY: zpretty
+zpretty: bin/zpretty ## Format ZCML/XML in the codebase
+	find $(PACKAGE_PATH) -name *.zcml | xargs ./bin/zpretty -i -z
+	find $(PACKAGE_PATH) -name *.xml | xargs ./bin/zpretty -i -x
+
 .PHONY: format
-format: black isort ## Format the codebase according to our standards
+format: black isort zpretty ## Format the codebase according to our standards
 
 .PHONY: lint
-lint: lint-isort lint-black lint-flake8 ## check style with flake8
+lint: lint-isort lint-black lint-flake8 lint-zpretty ## check style with flake8
 
 .PHONY: lint-flake8
 lint-flake8: bin/flakeheaven ## validate black formating
 	./bin/flakeheaven lint $(CHECK_PATH)
-
 
 .PHONY: lint-black
 lint-black: bin/black ## validate black formating
@@ -90,6 +89,11 @@ lint-black: bin/black ## validate black formating
 .PHONY: lint-isort
 lint-isort: bin/isort ## validate using isort
 	./bin/isort --check-only $(CHECK_PATH)
+
+.PHONY: lint-zpretty
+lint-zpretty: bin/zpretty ## validate ZCML/XML using zpretty
+	find $(PACKAGE_PATH) -name *.zcml | xargs ./bin/zpretty -i -z --check
+	find $(PACKAGE_PATH) -name *.xml | xargs ./bin/zpretty -i -x --check
 
 .PHONY: test
 test: ## run tests

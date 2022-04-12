@@ -1,0 +1,5 @@
+black
+isort
+flakeheaven
+zpretty
+zest.releaser[recommended]
