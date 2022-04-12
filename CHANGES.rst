@@ -13,6 +13,9 @@ Changelog
 - Remove buildout
   [ericof]
 
+- Use plone.app.testing 7.0.0a2
+  [ericof]
+
 4.0.0 (2022-01-21)
 ------------------
 

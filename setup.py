@@ -51,7 +51,7 @@ setup(
     ],
     extras_require={
         "test": [
-            "plone.app.testing",
+            "plone.app.testing>=7.0.0a2",
             "plone.testing",
             "plone.app.contenttypes",
             "plone.app.robotframework[debug]",
