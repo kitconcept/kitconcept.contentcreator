@@ -44,6 +44,18 @@ jobs:
             src
             setup.py
 
+  pyroma:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v2
+
+      - name: Run check
+        uses: kitconcept/code-analysis-action@main
+        with:
+          check: 'pyroma'
+          path: .
+
   zpretty:
     runs-on: ubuntu-latest
     steps:
