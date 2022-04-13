@@ -11,13 +11,33 @@ kitconcept.contentcreator
    :target: https://kitconcept.com/
 
 
-.. image:: https://github.com/kitconcept/kitconcept.contentcreator/workflows/kitconcept.contentcreator%20CI/badge.svg
-    :target: https://github.com/kitconcept/kitconcept.contentcreator/actions?query=workflow%3A%22kitconcept.contentcreator+CI%22
-
 This package is the responsible for automated content creation via
 plone.restapi serializers/creators.
 
 Initially based on ``collective.contentcreator`` written by Johannes Raggam (@thet) and evolved and improved from it.
+
+
+Code Health
+-----------
+
+.. |ci| image:: https://github.com/kitconcept/kitconcept.contentcreator/workflows/kitconcept.contentcreator%20CI/badge.svg
+    :target: https://github.com/kitconcept/kitconcept.contentcreator/actions?query=workflow%3A%22kitconcept.contentcreator+CI%22
+
+.. |latest| image:: https://img.shields.io/pypi/v/kitconcept.contentcreator.svg
+    :target: https://pypi.python.org/pypi/kitconcept.contentcreator/
+    :alt: Latest Version
+
+.. |license| image:: https://img.shields.io/pypi/l/kitconcept.contentcreator.svg
+    :target: https://pypi.python.org/pypi/kitconcept.contentcreator/
+    :alt: License
+
+.. |versions| image:: https://img.shields.io/pypi/pyversions/kitconcept.contentcreator.svg
+    :target: https://pypi.python.org/pypi/kitconcept.contentcreator/
+    :alt: Supported Python versions
+
++-----------+-----------+-----------+-----------+
+| |ci|      | |latest|  | |versions|| |license| |
++-----------+-----------+-----------+-----------+
 
 Usage
 =====
@@ -302,12 +322,8 @@ Setup::
 
 Run Static Code Analysis::
 
-  make code-Analysis
+  make lint
 
 Run Unit / Integration Tests::
 
   make test
-
-Run Robot Framework based acceptance tests::
-
-  make test-acceptance
