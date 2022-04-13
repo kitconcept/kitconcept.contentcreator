@@ -1,10 +1,11 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
-    xmlns:zcml="http://namespaces.zope.org/zcml"
     xmlns:i18n="http://namespaces.zope.org/i18n"
     xmlns:plone="http://namespaces.plone.org/plone"
-    i18n_domain="kitconcept.contentcreator">
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="kitconcept.contentcreator"
+    >
 
   <include package="plone.dexterity" />
   <include package="plone.api" />

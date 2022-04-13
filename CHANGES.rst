@@ -13,6 +13,9 @@ Changelog
 - Remove buildout
   [ericof]
 
+- Update Github Actions
+  [ericof]
+
 4.0.0 (2022-01-21)
 ------------------
 

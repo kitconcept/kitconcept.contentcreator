@@ -8,6 +8,8 @@ SHELL:=bash
 MAKEFLAGS+=--warn-undefined-variables
 MAKEFLAGS+=--no-builtin-rules
 
+CURRENT_USER=$$(whoami)
+
 # We like colors
 # From: https://coderwall.com/p/izxssa/colored-makefile-for-golang-projects
 RED=`tput setaf 1`
@@ -22,6 +24,9 @@ PACKAGE_NAME=kitconcept.contentcreator
 PACKAGE_PATH=src/
 CHECK_PATH=setup.py $(PACKAGE_PATH)
 
+LINT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest check
+FORMAT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest format
+
 # Add the following 'help' target to your Makefile
 # And add help text after each target name starting with '\#\#'
 .PHONY: help
@@ -32,15 +37,6 @@ bin/pip:
 	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
 	python3 -m venv .
 	bin/pip install -U pip wheel
-
-bin/black:
-	bin/pip install black
-
-bin/isort:
-	bin/pip install isort
-
-bin/flakeheaven:
-	bin/pip install flakeheaven
 
 .PHONY: build-plone-5.2
 build-plone-5.2: bin/pip ## Build Plone 5.2
@@ -64,32 +60,29 @@ clean: ## Remove old virtualenv and creates a new one
 	@echo "$(RED)==> Cleaning environment and build$(RESET)"
 	rm -rf bin lib lib64 include share etc var inituser pyvenv.cfg .installed.cfg
 
-.PHONY: black
-black: bin/black ## Format codebase
-	./bin/black $(CHECK_PATH)
-
-.PHONY: isort
-isort: bin/isort ## Format imports in the codebase
-	./bin/isort $(CHECK_PATH)
-
 .PHONY: format
-format: black isort ## Format the codebase according to our standards
+format:  ## Format the codebase according to our standards
+	$(FORMAT) "${PACKAGE_PATH}"
+	sudo chown -R ${CURRENT_USER}: *
 
 .PHONY: lint
-lint: lint-isort lint-black lint-flake8 ## check style with flake8
-
-.PHONY: lint-flake8
-lint-flake8: bin/flakeheaven ## validate black formating
-	./bin/flakeheaven lint $(CHECK_PATH)
-
+lint: lint-isort lint-black lint-flake8 lint-zpretty ## check code style
 
 .PHONY: lint-black
-lint-black: bin/black ## validate black formating
-	./bin/black --check --diff $(CHECK_PATH)
+lint-black: ## validate black formating
+	$(LINT) black "$(CHECK_PATH)"
+
+.PHONY: lint-flake8
+lint-flake8: ## validate black formating
+	$(LINT) flake8 "$(CHECK_PATH)"
 
 .PHONY: lint-isort
-lint-isort: bin/isort ## validate using isort
-	./bin/isort --check-only $(CHECK_PATH)
+lint-isort: ## validate using isort
+	$(LINT) isort "$(CHECK_PATH)"
+
+.PHONY: lint-zpretty
+lint-zpretty: ## validate ZCML/XML using zpretty
+	$(LINT) zpretty "$(PACKAGE_PATH)"
 
 .PHONY: test
 test: ## run tests
