@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.1 (unreleased)
+5.0.1 (2022-04-20)
 ------------------
 
 - Remove "always reindex" on finish object, since that was happening twice (on creation and on edit)
