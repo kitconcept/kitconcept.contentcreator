@@ -22,7 +22,9 @@ from zope.component import queryMultiAdapter
 from zope.container.interfaces import INameChooser
 from zope.event import notify
 from zope.globalrequest import getRequest
+from zope.lifecycleevent import Attributes
 from zope.lifecycleevent import ObjectCreatedEvent
+from zope.lifecycleevent import ObjectModifiedEvent
 
 import json
 import logging
@@ -335,6 +337,12 @@ def create_item_runner(  # noqa
                         )
                     )
                     plone_scale_generate_on_save(obj, request, image_fieldname)
+            else:
+                if deserializer.modified:
+                    descriptions = []
+                    for interface, names in deserializer.modified.items():
+                        descriptions.append(Attributes(interface, *names))
+                    notify(ObjectModifiedEvent(obj, *descriptions))
 
             # Set UUID - TODO: add to p.restapi
             if data.get("UID"):
@@ -400,9 +408,6 @@ def create_item_runner(  # noqa
             # create local roles
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
-
-            # reindex object
-            obj.reindexObject()
 
         except Exception as e:
             container_path = "/".join(container.getPhysicalPath())

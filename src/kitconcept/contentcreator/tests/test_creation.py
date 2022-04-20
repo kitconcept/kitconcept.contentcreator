@@ -179,6 +179,28 @@ class CreatorTestCase(unittest.TestCase):
             self.portal["a-folder"].contentIds(),
         )
 
+    def test_content_from_folder_indexing(self):
+        content = os.path.join(os.path.dirname(__file__), "content")
+        edited_content = os.path.join(os.path.dirname(__file__), "alternate")
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=content)
+
+        results = api.content.find(Title="Test Document 1")
+        self.assertEqual(1, len(results))
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=edited_content)
+
+        results = api.content.find(Title="Test Document Edited Title")
+        self.assertEqual(1, len(results))
+        results = api.content.find(Title="Test Document 1")
+        self.assertEqual(0, len(results))
+
+        # Also works for SearchableText (content inside a Slate block)
+        results = api.content.find(SearchableText="this is a slate link inside")
+        self.assertEqual(1, len(results))
+
     def test_content_from_folder_with_excludes(self):
         path = os.path.join(os.path.dirname(__file__), "content")
 

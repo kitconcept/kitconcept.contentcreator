@@ -1,0 +1,49 @@
+{
+  "@type": "Document",
+  "title": "Test Document Edited Title",
+  "blocks": {
+    "d3f1c443-583f-4e8e-a682-3bf25752a300": { "@type": "title" },
+    "2caef9e6-93ff-4edf-896f-8c16654a9923": {
+      "@type": "slate",
+      "plaintext": "this is a slate link inside some text",
+      "value": [
+        {
+          "type": "p",
+          "children": [
+            { "text": "this is a " },
+            {
+              "children": [
+                { "text": "" },
+                {
+                  "type": "a",
+                  "children": [{ "text": "slate link" }],
+                  "data": {
+                    "link": {
+                      "internal": {
+                        "internal_link": [
+                          {
+                            "@id": "/a-folder/anotherdoc",
+                            "title": "Image 1"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                { "text": "" }
+              ],
+              "type": "strong"
+            },
+            { "text": " inside some text" }
+          ]
+        }
+      ]
+    }
+  },
+  "blocks_layout": {
+    "items": [
+      "d3f1c443-583f-4e8e-a682-3bf25752a300",
+      "2caef9e6-93ff-4edf-896f-8c16654a9923"
+    ]
+  }
+}

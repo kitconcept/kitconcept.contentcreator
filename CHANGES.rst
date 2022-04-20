@@ -4,7 +4,10 @@ Changelog
 5.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove "always reindex" on finish object, since that was happening twice (on creation and on edit)
+  [sneridagh]
+- Fix on edit content issue notify event (the content was not being reindexed on deserialization)
+  [sneridagh]
 
 
 5.0.0 (2022-04-13)
