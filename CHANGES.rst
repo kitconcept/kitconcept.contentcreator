@@ -6,6 +6,7 @@ Changelog
 
 - Remove "always reindex" on finish object, since that was happening twice (on creation and on edit)
   [sneridagh]
+
 - Fix on edit content issue notify event (the content was not being reindexed on deserialization)
   [sneridagh]
 
