@@ -4,7 +4,9 @@ Changelog
 5.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix language when the deserialization dict does not contain a ``language`` key.
+  This was hidden by the general ``reindexObject`` that was removed previously.
+  [sneridagh]
 
 
 5.0.1 (2022-04-20)

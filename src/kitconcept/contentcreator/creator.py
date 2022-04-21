@@ -288,10 +288,15 @@ def create_item_runner(  # noqa
                 language_tool = api.portal.get_tool("portal_languages")
                 supported_langs = language_tool.getSupportedLanguages()
 
-                if (
+                if obj.portal_type == "LRF":
+                    if not obj.language:
+                        data["language"] = obj.id
+                    else:
+                        data["language"] = obj.language
+                elif (
                     "plone.app.multilingual" in api.addon.get_addons_ids("installed")
                     and len(supported_langs) > 1
-                    and not obj.language,
+                    and not obj.language
                 ):
                     # If pam, supported langs are two or more, and obj has no language set
                     # get language from path and set it
@@ -328,7 +333,6 @@ def create_item_runner(  # noqa
             if create_object:
                 if not getattr(deserializer, "notifies_create", False):
                     notify(ObjectCreatedEvent(obj))
-
                 obj = add(container, obj, rename=not bool(id_))
                 for image_fieldname in image_fieldnames_added:
                     logger.debug(
