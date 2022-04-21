@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.2 (unreleased)
+5.0.2 (2022-04-21)
 ------------------
 
 - Fix language when the deserialization dict does not contain a ``language`` key.
