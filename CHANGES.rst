@@ -4,7 +4,8 @@ Changelog
 5.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Don't swallow ValueError while importing a content item.
+  [davisagli]
 
 
 5.0.2 (2022-04-21)

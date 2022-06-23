@@ -658,6 +658,11 @@ def content_creator_from_folder(
         try:
             with open(filepath, "r") as f:
                 data = json.load(f)
+        except ValueError as e:
+            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
+        except FileNotFoundError as e:
+            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
+        else:
             data["id"] = splitted_path[-1]
             create_item_runner(
                 container,
@@ -669,10 +674,6 @@ def content_creator_from_folder(
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
-        except ValueError as e:
-            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
-        except FileNotFoundError as e:
-            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     # After creation, we refresh all the content created to update resolveuids
     if len(files) > 0:
