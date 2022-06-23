@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.3 (unreleased)
+5.0.3 (2022-06-23)
 ------------------
 
 - Don't swallow ValueError while importing a content item.
