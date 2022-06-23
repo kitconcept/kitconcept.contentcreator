@@ -254,7 +254,7 @@ def create_item_runner(  # noqa
             try:
                 obj = create(container, type_, id_=id_, title=title)
                 create_object = True
-            except Exception as e:
+            except Exception as e:  # noqa: B902
                 logger.error(
                     "Can not create object {} ({}) in {}, because of {}".format(
                         id_, type_, "/".join(container.getPhysicalPath()), e
@@ -413,16 +413,14 @@ def create_item_runner(  # noqa
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
 
-        except Exception as e:
+        except Exception as e:  # noqa: B902
             container_path = "/".join(container.getPhysicalPath())
             message = f'Could not edit the fields and properties for object {container_path}/{id_} (type: "{type_}", container: "{container_path}", id: "{id_}", title: "{title}") because: {e}'
             logger.error(message)
             if CONTINUE_ON_ERROR:
                 continue
             if DEBUG:
-                import pdb
-
-                pdb.set_trace()
+                breakpoint()  # noqa: T100
             raise
 
         # Call recursively
@@ -658,6 +656,9 @@ def content_creator_from_folder(
         try:
             with open(filepath, "r") as f:
                 data = json.load(f)
+        except (ValueError, FileNotFoundError) as e:
+            logger.error(f'Error in file structure: "{filepath}": {e}')
+        else:
             data["id"] = splitted_path[-1]
             create_item_runner(
                 container,
@@ -669,10 +670,6 @@ def content_creator_from_folder(
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
-        except ValueError as e:
-            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
-        except FileNotFoundError as e:
-            logger.error('Error in file structure: "{0}": {1}'.format(filepath, e))
 
     # After creation, we refresh all the content created to update resolveuids
     if len(files) > 0:
