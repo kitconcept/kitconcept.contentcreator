@@ -217,7 +217,7 @@ metadata:
             "content-type": "text/plain"}
       }
 
-Alternativelly, you can provide the image an extra property ``set_dummy_image``
+Alternatively, you can provide the image an extra property ``set_dummy_image``
 with an array of (image) field names that will create a dummy image placeholder
 in the specified fields in the to be created content type::
 
@@ -258,7 +258,10 @@ Again, a deprecated form is also supported (it will create the image in the
         "set_local_image": "image.png"
       }
 
-the same syntax is valid for files::
+By default, image scales are generated immediately. To disable this,
+set the ``CREATOR_SKIP_SCALES`` environment variable.
+
+The same syntax is valid for files::
 
       {
         "id": "an-file",
@@ -267,7 +270,7 @@ the same syntax is valid for files::
         "set_dummy_file": ["file"]
       }
 
-the deprecated form is also supported (it will create the file in the
+The deprecated form is also supported (it will create the file in the
 ``file`` field)::
 
       {

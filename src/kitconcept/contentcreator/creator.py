@@ -232,6 +232,7 @@ def create_item_runner(  # noqa
 
     DEBUG = os.environ.get("CREATOR_DEBUG")
     CONTINUE_ON_ERROR = os.environ.get("CREATOR_CONTINUE_ON_ERROR")
+    SKIP_SCALES = os.environ.get("CREATOR_SKIP_SCALES")
 
     for data in content_structure:
         type_ = data.get("@type", None)
@@ -334,13 +335,14 @@ def create_item_runner(  # noqa
                 if not getattr(deserializer, "notifies_create", False):
                     notify(ObjectCreatedEvent(obj))
                 obj = add(container, obj, rename=not bool(id_))
-                for image_fieldname in image_fieldnames_added:
-                    logger.debug(
-                        "{} - generating image scales for {} field".format(
-                            "/".join(obj.getPhysicalPath()), image_fieldname
+                if not SKIP_SCALES:
+                    for image_fieldname in image_fieldnames_added:
+                        logger.debug(
+                            "{} - generating image scales for {} field".format(
+                                "/".join(obj.getPhysicalPath()), image_fieldname
+                            )
                         )
-                    )
-                    plone_scale_generate_on_save(obj, request, image_fieldname)
+                        plone_scale_generate_on_save(obj, request, image_fieldname)
             else:
                 if deserializer.modified:
                     descriptions = []

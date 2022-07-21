@@ -4,7 +4,9 @@ Changelog
 5.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add the option to disable creating image scales immediately
+  by setting the ``CREATOR_SKIP_SCALES`` environment variable.
+  [davisagli]
 
 
 5.0.3 (2022-06-23)
