@@ -106,12 +106,13 @@ def create_object(path, is_folder=False):
     else:
         parent = create_object(path_parent, is_folder=True)
 
-    logger.info(f"{path} - create")
-
+    type_ = "Folder" if is_folder else "Document"
     obj = api.content.create(
-        container=parent, type="Folder" if is_folder else "Document", id=obj_id
+        container=parent, type=type_, id=obj_id
     )
     api.content.transition(obj=obj, transition="publish")
+    path = "/".join(obj.getPhysicalPath())
+    logger.info(f"{path} - created {type_}")
     return obj
 
 
@@ -343,9 +344,9 @@ def create_item_runner(  # noqa
             path = "/".join(obj.getPhysicalPath())
 
             if create_object:
-                logger.info(f"{path} - created")
+                logger.info(f"{path} - created {type_}")
             else:
-                logger.info(f"{path} - edited")
+                logger.info(f"{path} - edited {type_}")
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
