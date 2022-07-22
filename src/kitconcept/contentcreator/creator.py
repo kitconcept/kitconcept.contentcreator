@@ -30,6 +30,11 @@ import json
 import logging
 import os
 
+try:
+    from plone.app.multilingual.api import get_translation_manager
+except ImportError:
+    get_translation_manager = None
+
 
 class CustomFormatter(logging.Formatter):
 
@@ -184,6 +189,7 @@ def create_item_runner(  # noqa
     ignore_wf_types=["Image", "File"],
     logger=logger,
     do_not_edit_if_modified_after=None,
+    translation_map=None,
 ):
     """Create Dexterity contents from plone.restapi compatible structures.
 
@@ -415,6 +421,13 @@ def create_item_runner(  # noqa
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
 
+            # Translations:
+            # Store mapping to be processed at the end
+            if translation_map is None:
+                translation_map = {}
+            if data.get("translation_of"):
+                translation_map[path] = data["translation_of"]
+
         except Exception as e:  # noqa: B902
             container_path = "/".join(container.getPhysicalPath())
             message = f'Could not edit the fields and properties for object {container_path}/{id_} (type: "{type_}", container: "{container_path}", id: "{id_}", title: "{title}") because: {e}'
@@ -434,6 +447,7 @@ def create_item_runner(  # noqa
             ignore_wf_types=ignore_wf_types,
             logger=logger,
             base_image_path=base_image_path,
+            translation_map=translation_map,
         )
 
 
@@ -616,6 +630,7 @@ def content_creator_from_folder(
     ]
     has_content_json = False
     # has_siteroot_json = False
+    translation_map = {}
 
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
@@ -633,6 +648,7 @@ def content_creator_from_folder(
                 logger=logger,
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
+                translation_map=translation_map,
             )
             continue
         elif file_ == "siteroot.json":
@@ -661,7 +677,8 @@ def content_creator_from_folder(
         except (ValueError, FileNotFoundError) as e:
             logger.error(f'Error in file structure: "{filepath}": {e}')
         else:
-            data["id"] = splitted_path[-1]
+            if "id" not in data:
+                data["id"] = splitted_path[-1]
             create_item_runner(
                 container,
                 [data],
@@ -671,6 +688,7 @@ def content_creator_from_folder(
                 logger=logger,
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
+                translation_map=translation_map,
             )
 
     # After creation, we refresh all the content created to update resolveuids
@@ -684,6 +702,7 @@ def content_creator_from_folder(
             "Refreshing structured (content.json) content serialization after creation..."
         )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)
+    link_translations(translation_map)
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)
@@ -705,3 +724,32 @@ def modify_siteroot(root_info):
         )  # noqa
     else:
         portal.blocks_layout = json.dumps(blocks_layout)
+
+
+def link_translations(translation_map: dict):
+    if translation_map and get_translation_manager is None:
+        logger.warn("Content includes translations but plone.app.multilingual is not installed")
+        return
+
+    for translation_path, canonical_path in translation_map.items():
+        translation = api.content.get(translation_path)
+        lang = translation.language
+        canonical = api.content.get(canonical_path)
+        if translation.portal_type != canonical.portal_type:
+            logger.warn(
+                f"Can't link translation with a different type: {translation_path} & {canonical_path}"
+            )
+            continue
+        if translation.language == canonical.language:
+            logger.warn(
+                f"Can't link translation with the same language: {translation_path} & {canonical_path}"
+            )
+            continue
+        tm = get_translation_manager(canonical)
+        existing_translation = tm.get_translation(lang)
+        if existing_translation is not None and existing_translation.UID() != translation.UID():
+            tm.remove_translation(lang)
+            existing_translation = None
+        if existing_translation is None:
+            tm.register_translation(lang, translation)
+            logger.info(f"Linked {translation_path} as translation of {canonical_path}")
