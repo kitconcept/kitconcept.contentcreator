@@ -1,9 +1,10 @@
+import json
+import os
+
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from DateTime import DateTime
 from kitconcept import api
-from kitconcept.contentcreator.images import process_local_images
-from kitconcept.contentcreator.scales import plone_scale_generate_on_save
 from plone.app.content.interfaces import INameFromTitle
 from plone.app.dexterity import behaviors
 from plone.dexterity.utils import iterSchemata
@@ -26,52 +27,12 @@ from zope.lifecycleevent import Attributes
 from zope.lifecycleevent import ObjectCreatedEvent
 from zope.lifecycleevent import ObjectModifiedEvent
 
-import json
-import logging
-import os
+from .images import process_local_images
+from .scales import plone_scale_generate_on_save
+from .translations import link_translations
+from .utils import logger
+from .utils import handle_error
 
-try:
-    from plone.app.multilingual.api import get_translation_manager
-except ImportError:
-    get_translation_manager = None
-
-
-class CustomFormatter(logging.Formatter):
-
-    grey = "\x1b[38;21m"
-    yellow = "\x1b[33;21m"
-    green = "\u001b[32m"
-    blue = "\u001b[34m"
-    magenta = "\u001b[35m"
-    cyan = "\u001b[36m"
-    red = "\x1b[31;21m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    format = "%(asctime)s - %(levelname)s - %(message)s"
-    # format = "%(asctime)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-
-    FORMATS = {
-        logging.DEBUG: green + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset,
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
-
-
-logger = logging.getLogger("kitconcept.contentcreator")
-# This prevents that the log propagates to the root logger set by Zope
-logger.propagate = False
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(CustomFormatter())
-logger.addHandler(ch)
 
 DEFAULT_BLOCKS = {
     "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
@@ -189,7 +150,6 @@ def create_item_runner(  # noqa
     ignore_wf_types=["Image", "File"],
     logger=logger,
     do_not_edit_if_modified_after=None,
-    translation_map=None,
 ):
     """Create Dexterity contents from plone.restapi compatible structures.
 
@@ -236,8 +196,6 @@ def create_item_runner(  # noqa
     request = getRequest()
     portal = api.portal.get()
 
-    DEBUG = os.environ.get("CREATOR_DEBUG")
-    CONTINUE_ON_ERROR = os.environ.get("CREATOR_CONTINUE_ON_ERROR")
     SKIP_SCALES = os.environ.get("CREATOR_SKIP_SCALES")
 
     for data in content_structure:
@@ -421,22 +379,10 @@ def create_item_runner(  # noqa
             for user, roles in opts.get("local_roles", {}).items():
                 obj.manage_setLocalRoles(user, roles)
 
-            # Translations:
-            # Store mapping to be processed at the end
-            if translation_map is None:
-                translation_map = {}
-            if data.get("translation_of"):
-                translation_map[path] = data["translation_of"]
-
         except Exception as e:  # noqa: B902
             container_path = "/".join(container.getPhysicalPath())
             message = f'Could not edit the fields and properties for object {container_path}/{id_} (type: "{type_}", container: "{container_path}", id: "{id_}", title: "{title}") because: {e}'
-            logger.error(message)
-            if CONTINUE_ON_ERROR:
-                continue
-            if DEBUG:
-                breakpoint()  # noqa: T100
-            raise
+            handle_error(message)
 
         # Call recursively
         create_item_runner(
@@ -447,7 +393,6 @@ def create_item_runner(  # noqa
             ignore_wf_types=ignore_wf_types,
             logger=logger,
             base_image_path=base_image_path,
-            translation_map=translation_map,
         )
 
 
@@ -630,7 +575,7 @@ def content_creator_from_folder(
     ]
     has_content_json = False
     # has_siteroot_json = False
-    translation_map = {}
+    translation_map = None
 
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
@@ -648,7 +593,6 @@ def content_creator_from_folder(
                 logger=logger,
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
-                translation_map=translation_map,
             )
             continue
         elif file_ == "siteroot.json":
@@ -658,6 +602,9 @@ def content_creator_from_folder(
             continue
         # blacklist "images" folder
         elif file_ == "images":
+            continue
+        elif file_ == "translations.csv":
+            translation_map = os.path.join(folder, "translations.csv")
             continue
 
         # ex.: file_ = 'de.ueber-uns.json'
@@ -688,7 +635,6 @@ def content_creator_from_folder(
                 logger=logger,
                 base_image_path=base_image_path,
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
-                translation_map=translation_map,
             )
 
     # After creation, we refresh all the content created to update resolveuids
@@ -702,7 +648,9 @@ def content_creator_from_folder(
             "Refreshing structured (content.json) content serialization after creation..."
         )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)
-    link_translations(translation_map)
+
+    if translation_map is not None:
+        link_translations(translation_map)
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)
@@ -724,32 +672,3 @@ def modify_siteroot(root_info):
         )  # noqa
     else:
         portal.blocks_layout = json.dumps(blocks_layout)
-
-
-def link_translations(translation_map: dict):
-    if translation_map and get_translation_manager is None:
-        logger.warn("Content includes translations but plone.app.multilingual is not installed")
-        return
-
-    for translation_path, canonical_path in translation_map.items():
-        translation = api.content.get(translation_path)
-        lang = translation.language
-        canonical = api.content.get(canonical_path)
-        if translation.portal_type != canonical.portal_type:
-            logger.warn(
-                f"Can't link translation with a different type: {translation_path} & {canonical_path}"
-            )
-            continue
-        if translation.language == canonical.language:
-            logger.warn(
-                f"Can't link translation with the same language: {translation_path} & {canonical_path}"
-            )
-            continue
-        tm = get_translation_manager(canonical)
-        existing_translation = tm.get_translation(lang)
-        if existing_translation is not None and existing_translation.UID() != translation.UID():
-            tm.remove_translation(lang)
-            existing_translation = None
-        if existing_translation is None:
-            tm.register_translation(lang, translation)
-            logger.info(f"Linked {translation_path} as translation of {canonical_path}")

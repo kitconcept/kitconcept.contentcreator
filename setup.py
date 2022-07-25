@@ -54,6 +54,7 @@ setup(
             "plone.app.testing",
             "plone.testing",
             "plone.app.contenttypes",
+            "plone.app.multilingual",
             "plone.app.robotframework[debug]",
         ]
     },
