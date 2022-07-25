@@ -349,8 +349,8 @@ class CreatorTestCase(unittest.TestCase):
     def test_content_from_folder_with_translations(self):
         # install plone.app.multilingual
         language_tool = getToolByName(self.portal, "portal_languages")
-        language_tool.addSupportedLanguage('de')
-        language_tool.addSupportedLanguage('en')
+        language_tool.addSupportedLanguage("de")
+        language_tool.addSupportedLanguage("en")
         sms = SetupMultilingualSite(self.portal)
         sms.setupSite(self.portal)
         enable_translatable_behavior(self.portal)
@@ -359,8 +359,8 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        de = self.portal['de']['seite']
-        self.assertEqual(de.language, 'de')
-        en = self.portal['en']['page']
-        self.assertEqual(en.language, 'en')
+        de = self.portal["de"]["seite"]
+        self.assertEqual(de.language, "de")
+        en = self.portal["en"]["page"]
+        self.assertEqual(en.language, "en")
         self.assertEqual(get_translation_manager(en).tg, get_translation_manager(de).tg)

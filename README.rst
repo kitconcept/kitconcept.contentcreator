@@ -310,6 +310,15 @@ For all local images and files specified, you can specify the ``base_path`` for 
       base_image_path=__file__
   )
 
+Translations
+------------
+
+If you are using plone.app.multilingual and creating items from a folder,
+you can link translations using ``translations.csv`` in this format::
+
+    canonical,translation
+    /de/path/to/canonical,/en/path/to/translation
+
 
 Development
 -----------

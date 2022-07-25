@@ -4,6 +4,9 @@ Changelog
 5.0.4 (unreleased)
 ------------------
 
+- Add a feature for linking translations using ``translations.csv``
+  [davisagli]
+
 - Add the option to disable creating image scales immediately
   by setting the ``CREATOR_SKIP_SCALES`` environment variable.
   [davisagli]

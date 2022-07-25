@@ -1,6 +1,8 @@
-import json
-import os
-
+from .images import process_local_images
+from .scales import plone_scale_generate_on_save
+from .translations import link_translations
+from .utils import handle_error
+from .utils import logger
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from DateTime import DateTime
@@ -27,11 +29,8 @@ from zope.lifecycleevent import Attributes
 from zope.lifecycleevent import ObjectCreatedEvent
 from zope.lifecycleevent import ObjectModifiedEvent
 
-from .images import process_local_images
-from .scales import plone_scale_generate_on_save
-from .translations import link_translations
-from .utils import logger
-from .utils import handle_error
+import json
+import os
 
 
 DEFAULT_BLOCKS = {

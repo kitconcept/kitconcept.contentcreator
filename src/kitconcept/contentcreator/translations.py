@@ -1,8 +1,9 @@
-import csv
-
-from kitconcept import api
 from .utils import handle_error
 from .utils import logger
+from kitconcept import api
+
+import csv
+
 
 try:
     from plone.app.multilingual.api import get_translation_manager
@@ -16,7 +17,9 @@ class TranslationError(Exception):
 
 def link_translations(translation_map: str):
     if get_translation_manager is None:
-        logger.warn("Content includes translations but plone.app.multilingual is not installed")
+        logger.warn(
+            "Content includes translations but plone.app.multilingual is not installed"
+        )
         return
 
     with open(translation_map, "r", newline="") as f:
@@ -47,7 +50,10 @@ def link_translation(canonical_path: str, translation_path: str):
 
     tm = get_translation_manager(canonical)
     existing_translation = tm.get_translation(translation.language)
-    if existing_translation is not None and existing_translation.UID() != translation.UID():
+    if (
+        existing_translation is not None
+        and existing_translation.UID() != translation.UID()
+    ):
         tm.remove_translation(translation.language)
         existing_translation = None
     if existing_translation is None:
