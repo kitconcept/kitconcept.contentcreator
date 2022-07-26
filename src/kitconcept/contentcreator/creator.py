@@ -1,9 +1,12 @@
+from .images import process_local_images
+from .scales import plone_scale_generate_on_save
+from .translations import link_translations
+from .utils import handle_error
+from .utils import logger
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from DateTime import DateTime
 from kitconcept import api
-from kitconcept.contentcreator.images import process_local_images
-from kitconcept.contentcreator.scales import plone_scale_generate_on_save
 from plone.app.content.interfaces import INameFromTitle
 from plone.app.dexterity import behaviors
 from plone.dexterity.utils import iterSchemata
@@ -27,46 +30,8 @@ from zope.lifecycleevent import ObjectCreatedEvent
 from zope.lifecycleevent import ObjectModifiedEvent
 
 import json
-import logging
 import os
 
-
-class CustomFormatter(logging.Formatter):
-
-    grey = "\x1b[38;21m"
-    yellow = "\x1b[33;21m"
-    green = "\u001b[32m"
-    blue = "\u001b[34m"
-    magenta = "\u001b[35m"
-    cyan = "\u001b[36m"
-    red = "\x1b[31;21m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    format = "%(asctime)s - %(levelname)s - %(message)s"
-    # format = "%(asctime)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-
-    FORMATS = {
-        logging.DEBUG: green + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset,
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
-
-
-logger = logging.getLogger("kitconcept.contentcreator")
-# This prevents that the log propagates to the root logger set by Zope
-logger.propagate = False
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-ch.setFormatter(CustomFormatter())
-logger.addHandler(ch)
 
 DEFAULT_BLOCKS = {
     "d3f1c443-583f-4e8e-a682-3bf25752a300": {"@type": "title"},
@@ -230,8 +195,6 @@ def create_item_runner(  # noqa
     request = getRequest()
     portal = api.portal.get()
 
-    DEBUG = os.environ.get("CREATOR_DEBUG")
-    CONTINUE_ON_ERROR = os.environ.get("CREATOR_CONTINUE_ON_ERROR")
     SKIP_SCALES = os.environ.get("CREATOR_SKIP_SCALES")
 
     for data in content_structure:
@@ -418,12 +381,7 @@ def create_item_runner(  # noqa
         except Exception as e:  # noqa: B902
             container_path = "/".join(container.getPhysicalPath())
             message = f'Could not edit the fields and properties for object {container_path}/{id_} (type: "{type_}", container: "{container_path}", id: "{id_}", title: "{title}") because: {e}'
-            logger.error(message)
-            if CONTINUE_ON_ERROR:
-                continue
-            if DEBUG:
-                breakpoint()  # noqa: T100
-            raise
+            handle_error(message)
 
         # Call recursively
         create_item_runner(
@@ -616,6 +574,7 @@ def content_creator_from_folder(
     ]
     has_content_json = False
     # has_siteroot_json = False
+    translation_map = None
 
     for file_ in files:
         # If a content.json is found, proceed as if it contains a normal json arrayed
@@ -643,6 +602,9 @@ def content_creator_from_folder(
         # blacklist "images" folder
         elif file_ == "images":
             continue
+        elif file_ == "translations.csv":
+            translation_map = os.path.join(folder, "translations.csv")
+            continue
 
         # ex.: file_ = 'de.ueber-uns.json'
         filepath = os.path.join(folder, file_)
@@ -661,7 +623,8 @@ def content_creator_from_folder(
         except (ValueError, FileNotFoundError) as e:
             logger.error(f'Error in file structure: "{filepath}": {e}')
         else:
-            data["id"] = splitted_path[-1]
+            if "id" not in data:
+                data["id"] = splitted_path[-1]
             create_item_runner(
                 container,
                 [data],
@@ -684,6 +647,9 @@ def content_creator_from_folder(
             "Refreshing structured (content.json) content serialization after creation..."
         )
         refresh_objects_created_by_structure(api.portal.get(), content_structure)
+
+    if translation_map is not None:
+        link_translations(translation_map)
 
     for content_type in temp_enable_content_types:
         disable_content_type(portal, content_type)

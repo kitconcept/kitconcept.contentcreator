@@ -5,7 +5,11 @@ from kitconcept.contentcreator.creator import create_item_runner
 from kitconcept.contentcreator.creator import load_json
 from kitconcept.contentcreator.creator import refresh_objects_created_by_structure
 from kitconcept.contentcreator.testing import CONTENTCREATOR_CORE_INTEGRATION_TESTING
+from plone.app.multilingual.api import get_translation_manager
+from plone.app.multilingual.browser.setup import SetupMultilingualSite
+from plone.app.multilingual.setuphandlers import enable_translatable_behavior
 from plone.app.testing import applyProfile
+from Products.CMFCore.utils import getToolByName
 
 import json
 import os
@@ -341,3 +345,22 @@ class CreatorTestCase(unittest.TestCase):
             )
 
         self.assertTrue(self.portal["a-folder"].effective() < DateTime())
+
+    def test_content_from_folder_with_translations(self):
+        # install plone.app.multilingual
+        language_tool = getToolByName(self.portal, "portal_languages")
+        language_tool.addSupportedLanguage("de")
+        language_tool.addSupportedLanguage("en")
+        sms = SetupMultilingualSite(self.portal)
+        sms.setupSite(self.portal)
+        enable_translatable_behavior(self.portal)
+
+        path = os.path.join(os.path.dirname(__file__), "content_with_translations")
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(folder_name=path)
+
+        de = self.portal["de"]["seite"]
+        self.assertEqual(de.language, "de")
+        en = self.portal["en"]["page"]
+        self.assertEqual(en.language, "en")
+        self.assertEqual(get_translation_manager(en).tg, get_translation_manager(de).tg)
