@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.4 (unreleased)
+5.0.4 (2022-07-26)
 ------------------
 
 - Add a feature for linking translations using ``translations.csv``
