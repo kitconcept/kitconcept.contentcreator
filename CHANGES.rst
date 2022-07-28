@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.5 (unreleased)
+5.0.5 (2022-07-28)
 ------------------
 
 - ``content_creator_from_folder`` now accepts an optional list ``types_order``
