@@ -5,6 +5,7 @@ from .utils import handle_error
 from .utils import logger
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
+from dataclasses import dataclass
 from DateTime import DateTime
 from kitconcept import api
 from plone.app.content.interfaces import INameFromTitle
@@ -19,6 +20,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
 from sys import maxsize
+from typing import Optional
+from typing import Union
 from zExceptions import NotFound
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
@@ -29,8 +32,6 @@ from zope.lifecycleevent import Attributes
 from zope.lifecycleevent import ObjectCreatedEvent
 from zope.lifecycleevent import ObjectModifiedEvent
 
-from dataclasses import dataclass
-from typing import Optional
 import json
 import os
 import pathlib
@@ -48,19 +49,28 @@ DEFAULT_BLOCKS_LAYOUT = {
 }
 
 
-def load_json(path: pathlib.Path, base_path: Optional[pathlib.Path] = None):
+Pathlike = Union[str, pathlib.Path]
+
+
+def load_json(path: Pathlike, base_path: Optional[Pathlike] = None):
     """Load JSON from a file.
 
     :param path: Absolute or relative path to the JSON file. If relative,
                  you might want to use the next parameter too.
-    :type path: string
+    :type path: string or pathlib.Path
     :param base_path: Base path, from which the relative path is calculated.
                       From the calling module, you will pass ``__file__`` to
                       this argument.
     :returns: Decoded JSON structure as Python dictionary.
     :rtype: dict
     """
+    if isinstance(path, str):
+        path = pathlib.Path(path)
     if base_path:
+        if isinstance(base_path, str):
+            base_path = pathlib.Path(base_path)
+            if base_path.is_file():
+                base_path = base_path.parent
         path = base_path / path
     return json.loads(path.read_text())
 
@@ -107,9 +117,7 @@ def create_object(path, is_folder=False):
         parent = create_object(path_parent, is_folder=True)
 
     type_ = "Folder" if is_folder else "Document"
-    obj = api.content.create(
-        container=parent, type=type_, id=obj_id
-    )
+    obj = api.content.create(container=parent, type=type_, id=obj_id)
     api.content.transition(obj=obj, transition="publish")
     path = "/".join(obj.getPhysicalPath())
     logger.info(f"{path} - created {type_}")
@@ -623,6 +631,7 @@ def content_creator_from_folder(
             types_order.index(item_type) if item_type in types_order else maxsize,
             name.lower(),  # alphabetical
         )
+
     items.sort(key=sort_key)
 
     # Process the items

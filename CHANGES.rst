@@ -4,8 +4,15 @@ Changelog
 5.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- ``content_creator_from_folder`` now accepts an optional list ``types_order``
+  to prefer loading particular content types earlier
+  [davisagli]
 
+- Improved logging to include the content type.
+  [davisagli]
+
+- Refactored to use ``pathlib`` internally.
+  [davisagli]
 
 5.0.4 (2022-07-26)
 ------------------
@@ -15,6 +22,10 @@ Changelog
 
 - Add the option to disable creating image scales immediately
   by setting the ``CREATOR_SKIP_SCALES`` environment variable.
+  [davisagli]
+
+- If the ``id`` in JSON doesn't match the id from the filename,
+  prefer the one in the JSON.
   [davisagli]
 
 
