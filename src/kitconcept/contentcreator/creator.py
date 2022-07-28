@@ -5,6 +5,7 @@ from .utils import handle_error
 from .utils import logger
 from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
+from dataclasses import dataclass
 from DateTime import DateTime
 from kitconcept import api
 from plone.app.content.interfaces import INameFromTitle
@@ -19,6 +20,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone.interfaces.constrains import ISelectableConstrainTypes
 from Products.CMFPlone.utils import safe_hasattr
 from sys import maxsize
+from typing import Optional
+from typing import Union
 from zExceptions import NotFound
 from zope.component import getMultiAdapter
 from zope.component import queryMultiAdapter
@@ -31,6 +34,7 @@ from zope.lifecycleevent import ObjectModifiedEvent
 
 import json
 import os
+import pathlib
 
 
 DEFAULT_BLOCKS = {
@@ -45,25 +49,30 @@ DEFAULT_BLOCKS_LAYOUT = {
 }
 
 
-def load_json(path, base_path=None):
+Pathlike = Union[str, pathlib.Path]
+
+
+def load_json(path: Pathlike, base_path: Optional[Pathlike] = None):
     """Load JSON from a file.
 
     :param path: Absolute or relative path to the JSON file. If relative,
                  you might want to use the next parameter too.
-    :type path: string
+    :type path: string or pathlib.Path
     :param base_path: Base path, from which the relative path is calculated.
                       From the calling module, you will pass ``__file__`` to
                       this argument.
     :returns: Decoded JSON structure as Python dictionary.
     :rtype: dict
     """
+    if isinstance(path, str):
+        path = pathlib.Path(path)
     if base_path:
-        path = os.path.join(os.path.dirname(base_path), path)
-    content_json = ""
-    with open(path, "r") as file_handle:
-        content_json = json.loads(file_handle.read())
-
-    return content_json
+        if isinstance(base_path, str):
+            base_path = pathlib.Path(base_path)
+            if base_path.is_file():
+                base_path = base_path.parent
+        path = base_path / path
+    return json.loads(path.read_text())
 
 
 def set_exclude_from_nav(obj):
@@ -107,12 +116,11 @@ def create_object(path, is_folder=False):
     else:
         parent = create_object(path_parent, is_folder=True)
 
-    logger.info(f"{path} - create")
-
-    obj = api.content.create(
-        container=parent, type="Folder" if is_folder else "Document", id=obj_id
-    )
+    type_ = "Folder" if is_folder else "Document"
+    obj = api.content.create(container=parent, type=type_, id=obj_id)
     api.content.transition(obj=obj, transition="publish")
+    path = "/".join(obj.getPhysicalPath())
+    logger.info(f"{path} - created {type_}")
     return obj
 
 
@@ -344,9 +352,9 @@ def create_item_runner(  # noqa
             path = "/".join(obj.getPhysicalPath())
 
             if create_object:
-                logger.info(f"{path} - created")
+                logger.info(f"{path} - created {type_}")
             else:
-                logger.info(f"{path} - edited")
+                logger.info(f"{path} - edited {type_}")
 
             # CONSTRAIN TYPES
             locally_allowed_types = opts.get("locally_allowed_types", False)
@@ -471,7 +479,7 @@ def refresh_objects_created_by_structure(container, content_structure):
             )
 
 
-def refresh_objects_created_by_file(filepath, file_):
+def refresh_objects_created_by_file(path: pathlib.Path):
     def deserialize(obj, blocks=None, validate_all=False):
         request = getRequest()
         request["BODY"] = json.dumps({"blocks": blocks})
@@ -490,19 +498,25 @@ def refresh_objects_created_by_file(filepath, file_):
         serializer = getMultiAdapter((field, context, request), IFieldSerializer)
         return serializer()
 
-    splitted_path = os.path.splitext(file_)[0].split(".")
-    path = "/" + "/".join(splitted_path[:-1])
+    splitted_path = path.stem.split(".")
+    plone_path = "/" + "/".join(splitted_path[:-1])
     id_ = splitted_path[-1]
     try:
-        container = api.content.get(path=path)
+        container = api.content.get(path=plone_path)
     except NotFound:
-        logger.error('Could not look up container under "{}"'.format(path))
+        logger.error('Could not look up container under "{}"'.format(plone_path))
         return
 
     obj = container.get(id_, None)
     if obj and IBlocks.providedBy(obj):
         blocks_serialized = serialize(obj)
         deserialize(obj, blocks_serialized)
+
+
+@dataclass
+class Item:
+    path: pathlib.Path
+    structure: dict
 
 
 def content_creator_from_folder(
@@ -513,6 +527,7 @@ def content_creator_from_folder(
     ignore_wf_types=["Image", "File"],
     logger=logger,
     temp_enable_content_types=[],
+    types_order=[],
     custom_order=[],
     do_not_edit_if_modified_after=None,
     exclude=[],
@@ -555,34 +570,27 @@ def content_creator_from_folder(
     for content_type in temp_enable_content_types:
         enable_content_type(portal, content_type)
 
-    folder = os.path.join(os.path.dirname(__file__), folder_name)
+    folder = pathlib.Path(__file__).parent / folder_name
 
-    # Get files in the right order
-    def sort_key(item):
-        return (
-            len(item.split(".")[:-1]),  # First folders
-            custom_order.index(item)
-            if item in custom_order
-            else maxsize,  # Custom order
-            item.lower(),  # Than alphabetically
-        )
-
-    files = [
-        filename
-        for filename in sorted(os.listdir(folder), key=sort_key)
-        if not filename.startswith(tuple(exclude))
-    ]
+    # Load files from folder
+    items = []
     has_content_json = False
-    # has_siteroot_json = False
     translation_map = None
 
-    for file_ in files:
+    for path in folder.iterdir():
+        # Skip explicitly excluded filenames
+        if path.name.startswith(tuple(exclude)):
+            continue
+        # Skip directories
+        if path.is_dir():
+            continue
+
         # If a content.json is found, proceed as if it contains a normal json arrayed
         # structure
-        if file_ == "content.json":
+        if path.name == "content.json":
             has_content_json = True
             logger.debug("content.json file found, creating content")
-            content_structure = load_json(os.path.join(folder, "content.json"))
+            content_structure = load_json(path)
             create_item_runner(
                 api.portal.get(),
                 content_structure,
@@ -594,40 +602,55 @@ def content_creator_from_folder(
                 do_not_edit_if_modified_after=do_not_edit_if_modified_after,
             )
             continue
-        elif file_ == "siteroot.json":
+        elif path.name == "siteroot.json":
             logger.debug("Site root info found, applying changes")
-            root_info = load_json(os.path.join(folder, "siteroot.json"))
+            root_info = load_json(path)
             modify_siteroot(root_info)
             continue
-        # blacklist "images" folder
-        elif file_ == "images":
-            continue
-        elif file_ == "translations.csv":
-            translation_map = os.path.join(folder, "translations.csv")
+        elif path.name == "translations.csv":
+            translation_map = path
             continue
 
-        # ex.: file_ = 'de.ueber-uns.json'
-        filepath = os.path.join(folder, file_)
-        # ex.: path = '/de'
-        splitted_path = os.path.splitext(file_)[0].split(".")
-        path = "/" + "/".join(splitted_path[:-1])
         try:
-            container = api.content.get(path=path)
-        except NotFound:
-            logger.error('Could not look up container under "{}"'.format(path))
-        if container is None:
-            container = create_object(path)
-        try:
-            with open(filepath, "r") as f:
-                data = json.load(f)
+            structure = load_json(path)
+            items.append(Item(path, structure))
         except (ValueError, FileNotFoundError) as e:
-            logger.error(f'Error in file structure: "{filepath}": {e}')
+            logger.error(f'Error in file structure: "{path}": {e}')
+
+    # Apply ordering rules:
+    # - Create containers first (lower depth in content tree first)
+    # - custom_order
+    # - types_order
+    # - alphabetical by id
+    def sort_key(item: Item):
+        name = item.path.name
+        item_type = item.structure.get("@type", "")
+        return (
+            len(name.split(".")[:-1]),  # depth
+            custom_order.index(name) if name in custom_order else maxsize,
+            types_order.index(item_type) if item_type in types_order else maxsize,
+            name.lower(),  # alphabetical
+        )
+
+    items.sort(key=sort_key)
+
+    # Process the items
+    for item in items:
+        # e.g. de.folder.json -> /de
+        splitted_path = item.path.stem.split(".")
+        plone_path = "/" + "/".join(splitted_path[:-1])
+        try:
+            container = api.content.get(path=plone_path)
+        except NotFound:
+            logger.error(f'Could not look up container under "{plone_path}"')
+        if container is None:
+            container = create_object(plone_path)
         else:
-            if "id" not in data:
-                data["id"] = splitted_path[-1]
+            if "id" not in item.structure:
+                item.structure["id"] = splitted_path[-1]
             create_item_runner(
                 container,
-                [data],
+                [item.structure],
                 default_lang=default_lang,
                 default_wf_state=default_wf_state,
                 ignore_wf_types=ignore_wf_types,
@@ -637,11 +660,10 @@ def content_creator_from_folder(
             )
 
     # After creation, we refresh all the content created to update resolveuids
-    if len(files) > 0:
+    if len(items) > 0:
         logger.debug("Refreshing content serialization after creation...")
-    for file_ in files:
-        filepath = os.path.join(folder, file_)
-        refresh_objects_created_by_file(filepath, file_)
+        for item in items:
+            refresh_objects_created_by_file(item.path)
     if has_content_json:
         logger.debug(
             "Refreshing structured (content.json) content serialization after creation..."

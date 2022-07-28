@@ -179,7 +179,13 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
-            ["a-document-1", "a-document-2", "a-document-3", "the-last-document"],
+            [
+                "a-document-1",
+                "a-document-2",
+                "a-document-3",
+                "a-link",
+                "the-last-document",
+            ],
             self.portal["a-folder"].contentIds(),
         )
 
@@ -215,7 +221,7 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
-            ["a-document-2", "a-document-3", "the-last-document"],
+            ["a-document-2", "a-document-3", "a-link", "the-last-document"],
             self.portal["a-folder"].contentIds(),
         )
 
@@ -233,7 +239,33 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(["front-page", "a-folder"], self.portal.contentIds())
         self.assertEqual(
-            ["a-document-2", "a-document-1", "a-document-3", "the-last-document"],
+            [
+                "a-document-2",
+                "a-document-1",
+                "a-document-3",
+                "a-link",
+                "the-last-document",
+            ],
+            self.portal["a-folder"].contentIds(),
+        )
+
+    def test_content_from_folder_types_order(self):
+        path = os.path.join(os.path.dirname(__file__), "content")
+
+        with api.env.adopt_roles(["Manager"]):
+            content_creator_from_folder(
+                folder_name=path,
+                types_order=["Link", "Document"],
+            )
+
+        self.assertEqual(
+            [
+                "a-link",
+                "a-document-1",
+                "a-document-2",
+                "a-document-3",
+                "the-last-document",
+            ],
             self.portal["a-folder"].contentIds(),
         )
 

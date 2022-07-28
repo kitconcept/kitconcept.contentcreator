@@ -3,6 +3,7 @@ from .utils import logger
 from kitconcept import api
 
 import csv
+import pathlib
 
 
 try:
@@ -15,21 +16,21 @@ class TranslationError(Exception):
     pass
 
 
-def link_translations(translation_map: str):
+def link_translations(translation_map: pathlib.Path):
     if get_translation_manager is None:
         logger.warn(
             "Content includes translations but plone.app.multilingual is not installed"
         )
         return
 
-    with open(translation_map, "r", newline="") as f:
+    with translation_map.open("r", newline="") as f:
         reader = enumerate(csv.reader(f), start=1)
         next(reader)  # skip header
         for lineno, (canonical_path, translation_path) in reader:
             try:
                 link_translation(canonical_path, translation_path)
             except TranslationError as e:
-                handle_error(f"translations.csv line {lineno}: {e}")
+                handle_error(f"{translation_map.name} line {lineno}: {e}")
 
 
 def link_translation(canonical_path: str, translation_path: str):
