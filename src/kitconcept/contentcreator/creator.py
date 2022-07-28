@@ -600,7 +600,7 @@ def content_creator_from_folder(
             modify_siteroot(root_info)
             continue
         elif path.name == "translations.csv":
-            translation_map = os.path.join(folder, "translations.csv")
+            translation_map = path
             continue
 
         try:
@@ -611,18 +611,17 @@ def content_creator_from_folder(
 
     # Apply ordering rules:
     # - Create containers first (lower depth in content tree first)
-    # - types_order
     # - custom_order
+    # - types_order
     # - alphabetical by id
     def sort_key(item: Item):
+        name = item.path.name
         item_type = item.structure.get("@type", "")
         return (
-            len(item.path.name.split(".")[:-1]),  # depth
+            len(name.split(".")[:-1]),  # depth
+            custom_order.index(name) if name in custom_order else maxsize,
             types_order.index(item_type) if item_type in types_order else maxsize,
-            custom_order.index(item)
-            if item in custom_order
-            else maxsize,  # custom order
-            item.path.name.lower(),  # alphabetical
+            name.lower(),  # alphabetical
         )
     items.sort(key=sort_key)
 
@@ -638,8 +637,8 @@ def content_creator_from_folder(
         if container is None:
             container = create_object(plone_path)
         else:
-            if "id" not in data:
-                data["id"] = splitted_path[-1]
+            if "id" not in item.structure:
+                item.structure["id"] = splitted_path[-1]
             create_item_runner(
                 container,
                 [item.structure],
