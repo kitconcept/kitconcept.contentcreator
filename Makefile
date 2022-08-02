@@ -17,8 +17,8 @@ GREEN=`tput setaf 2`
 RESET=`tput sgr0`
 YELLOW=`tput setaf 3`
 
-PLONE5=5.2.7
-PLONE6=6.0.0a4
+PLONE5=5.2.9
+PLONE6=6.0.0b1
 
 PACKAGE_NAME=kitconcept.contentcreator
 PACKAGE_PATH=src/
