@@ -22,7 +22,7 @@ PLONE6=6.0.0a4
 
 PACKAGE_NAME=kitconcept.contentcreator
 PACKAGE_PATH=src/
-CHECK_PATH=setup.py $(PACKAGE_PATH)
+CHECK_PATH=$(PACKAGE_PATH) setup.py
 
 CODE_QUALITY_VERSION=1.0.1
 LINT=docker run --rm -v "$(PWD)":/github/workspace plone/code-quality:${CODE_QUALITY_VERSION} check

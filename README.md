@@ -57,7 +57,6 @@ In your setuphandlers.py you need to:
 
 ```python
 from kitconcept.contentcreator.creator import content_creator_from_folder
-...
 
 content_creator_from_folder()
 ```
@@ -65,18 +64,18 @@ content_creator_from_folder()
 the method `content_creator_from_folder` has the following signature:
 
 ```python
-def content_creator_from_folder(
-  folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
-  base_image_path=os.path.join(os.path.dirname(__file__), "content_images"),
-  default_lang=None,
-  default_wf_state=None,
-  ignore_wf_types=["Image", "File"],
-  logger=logger,
-  temp_enable_content_types=[],
-  custom_order=[],
-  do_not_edit_if_modified_after=None,
-  exclude=[],
-):
+    def content_creator_from_folder(
+        folder_name=os.path.join(os.path.dirname(__file__), "content_creator"),
+        base_image_path=os.path.join(os.path.dirname(__file__), "content_images"),
+        default_lang=None,
+        default_wf_state=None,
+        ignore_wf_types=["Image", "File"],
+        logger=logger,
+        temp_enable_content_types=[],
+        custom_order=[],
+        do_not_edit_if_modified_after=None,
+        exclude=[],
+    ):
 ```
 
 The creator will bail out (raise) if any object errors on creation (or edition). There are
@@ -131,7 +130,7 @@ call them all at the same time, via a custom adapter:
 from kitconcept.contentcreator.interfaces import ICreateTestContent
 
 for name, provider in getAdapters((api.portal.get(), ), ICreateTestContent):
-  provider()
+    provider()
 ```
 
 this should be the declaration in the other package:
