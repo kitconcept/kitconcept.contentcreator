@@ -24,8 +24,9 @@ PACKAGE_NAME=kitconcept.contentcreator
 PACKAGE_PATH=src/
 CHECK_PATH=setup.py $(PACKAGE_PATH)
 
-LINT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest check
-FORMAT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest format
+CODE_QUALITY_VERSION=1.0.1
+LINT=docker run --rm -v "$(PWD)":/github/workspace plone/code-quality:${CODE_QUALITY_VERSION} check
+FORMAT=docker run --rm -v "${PWD}":/github/workspace plone/code-quality:${CODE_QUALITY_VERSION} format
 
 # Add the following 'help' target to your Makefile
 # And add help text after each target name starting with '\#\#'

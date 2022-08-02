@@ -6,6 +6,8 @@ Changelog
 
 - Change README, CHANGES, CONTRIBUTOR to markdown. @ericof
 
+- Use plone/code-analysis-action@v1 for Code Analysis @ericof
+
 
 5.0.5 (2022-07-28)
 ------------------
