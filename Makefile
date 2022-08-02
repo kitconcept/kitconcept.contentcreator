@@ -17,15 +17,16 @@ GREEN=`tput setaf 2`
 RESET=`tput sgr0`
 YELLOW=`tput setaf 3`
 
-PLONE5=5.2.7
-PLONE6=6.0.0a4
+PLONE5=5.2.9
+PLONE6=6.0.0b1
 
 PACKAGE_NAME=kitconcept.contentcreator
 PACKAGE_PATH=src/
-CHECK_PATH=setup.py $(PACKAGE_PATH)
+CHECK_PATH=$(PACKAGE_PATH) setup.py
 
-LINT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest check
-FORMAT=docker run --rm -v "${PWD}":/github/workspace kitconcept/code-quality:latest format
+CODE_QUALITY_VERSION=1.0.1
+LINT=docker run --rm -v "$(PWD)":/github/workspace plone/code-quality:${CODE_QUALITY_VERSION} check
+FORMAT=docker run --rm -v "${PWD}":/github/workspace plone/code-quality:${CODE_QUALITY_VERSION} format
 
 # Add the following 'help' target to your Makefile
 # And add help text after each target name starting with '\#\#'
@@ -66,7 +67,7 @@ format:  ## Format the codebase according to our standards
 	sudo chown -R ${CURRENT_USER}: *
 
 .PHONY: lint
-lint: lint-isort lint-black lint-flake8 lint-zpretty ## check code style
+lint: lint-isort lint-black lint-flake8 lint-zpretty lint-pyroma ## check code style
 
 .PHONY: lint-black
 lint-black: ## validate black formating
@@ -83,6 +84,10 @@ lint-isort: ## validate using isort
 .PHONY: lint-zpretty
 lint-zpretty: ## validate ZCML/XML using zpretty
 	$(LINT) zpretty "$(PACKAGE_PATH)"
+
+.PHONY: lint-pyroma
+lint-pyroma: ## validate using pyroma
+	$(LINT) pyroma ./
 
 .PHONY: test
 test: ## run tests

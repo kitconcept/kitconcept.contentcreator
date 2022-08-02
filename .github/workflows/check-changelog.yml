@@ -12,5 +12,5 @@ jobs:
       - name: Check for changelog entry
         uses: dangoslen/changelog-enforcer@v2
         with:
-          changeLogPath: 'CHANGES.rst'
+          changeLogPath: 'CHANGES.md'
           skipLabels: 'Skip-Changelog'
