@@ -66,7 +66,7 @@ format:  ## Format the codebase according to our standards
 	sudo chown -R ${CURRENT_USER}: *
 
 .PHONY: lint
-lint: lint-isort lint-black lint-flake8 lint-zpretty ## check code style
+lint: lint-isort lint-black lint-flake8 lint-zpretty lint-pyroma ## check code style
 
 .PHONY: lint-black
 lint-black: ## validate black formating
@@ -83,6 +83,10 @@ lint-isort: ## validate using isort
 .PHONY: lint-zpretty
 lint-zpretty: ## validate ZCML/XML using zpretty
 	$(LINT) zpretty "$(PACKAGE_PATH)"
+
+.PHONY: lint-pyroma
+lint-pyroma: ## validate using pyroma
+	$(LINT) pyroma ./
 
 .PHONY: test
 test: ## run tests
