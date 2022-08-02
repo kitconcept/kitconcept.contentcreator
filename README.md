@@ -76,6 +76,7 @@ the method `content_creator_from_folder` has the following signature:
         do_not_edit_if_modified_after=None,
         exclude=[],
     ):
+
 ```
 
 The creator will bail out (raise) if any object errors on creation (or edition). There are
