@@ -870,15 +870,21 @@ def modify_siteroot(root_info):
     portal = api.portal.get()
     blocks = root_info["blocks"]
     blocks_layout = root_info["blocks_layout"]
+    plone_version = pkg_resources.get_distribution("Plone").version
+    major_version = int(plone_version[0])
 
-    if not getattr(portal, "blocks", False):
-        portal.manage_addProperty("blocks", json.dumps(blocks), "string")
+    if major_version >= 6:
+        portal.blocks = blocks
+        portal.blocks_layout = blocks_layout
     else:
-        portal.blocks = json.dumps(blocks)
+        if not getattr(portal, "blocks", False):
+            portal.manage_addProperty("blocks", json.dumps(blocks), "string")
+        else:
+            portal.blocks = json.dumps(blocks)
 
-    if not getattr(portal, "blocks_layout", False):
-        portal.manage_addProperty(
-            "blocks_layout", json.dumps(blocks_layout), "string"
-        )  # noqa
-    else:
-        portal.blocks_layout = json.dumps(blocks_layout)
+        if not getattr(portal, "blocks_layout", False):
+            portal.manage_addProperty(
+                "blocks_layout", json.dumps(blocks_layout), "string"
+            )  # noqa
+        else:
+            portal.blocks_layout = json.dumps(blocks_layout)
