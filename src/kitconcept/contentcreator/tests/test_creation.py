@@ -286,6 +286,7 @@ class CreatorTestCase(unittest.TestCase):
         }
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
+
         self.assertEqual(
             blocks,
             self.portal.blocks
@@ -294,7 +295,7 @@ class CreatorTestCase(unittest.TestCase):
         )
         self.assertEqual(
             blocks_layout,
-            self.portal.blocks
+            self.portal.blocks_layout
             if self.major_version >= 6
             else json.loads(self.portal.blocks_layout),
         )
@@ -322,7 +323,7 @@ class CreatorTestCase(unittest.TestCase):
         )
         self.assertEqual(
             blocks_layout,
-            self.portal.blocks
+            self.portal.blocks_layout
             if self.major_version >= 6
             else json.loads(self.portal.blocks_layout),
         )
