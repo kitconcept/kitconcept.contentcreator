@@ -13,8 +13,8 @@ from Products.CMFCore.utils import getToolByName
 
 import json
 import os
-import unittest
 import pkg_resources
+import unittest
 
 
 class CreatorTestCase(unittest.TestCase):
