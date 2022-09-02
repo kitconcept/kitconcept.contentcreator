@@ -284,8 +284,8 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        self.assertEqual(blocks, json.loads(self.portal.blocks))
-        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+        self.assertEqual(blocks, self.portal.blocks)
+        self.assertEqual(blocks_layout, self.portal.blocks_layout)
 
     def test_repeat_creation_twice(self):
         path = os.path.join(os.path.dirname(__file__), "content")
@@ -302,8 +302,8 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        self.assertEqual(blocks, json.loads(self.portal.blocks))
-        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+        self.assertEqual(blocks, self.portal.blocks)
+        self.assertEqual(blocks_layout, self.portal.blocks_layout)
 
         self.portal["a-folder"]["a-document-1"].title = "the modified title"
 
