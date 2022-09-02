@@ -296,7 +296,7 @@ class CreatorTestCase(unittest.TestCase):
             blocks_layout,
             self.portal.blocks
             if self.major_version >= 6
-            else json.loads(self.portal.blocks),
+            else json.loads(self.portal.blocks_layout),
         )
 
     def test_repeat_creation_twice(self):
@@ -324,7 +324,7 @@ class CreatorTestCase(unittest.TestCase):
             blocks_layout,
             self.portal.blocks
             if self.major_version >= 6
-            else json.loads(self.portal.blocks),
+            else json.loads(self.portal.blocks_layout),
         )
 
         self.portal["a-folder"]["a-document-1"].title = "the modified title"
