@@ -13,6 +13,7 @@ from Products.CMFCore.utils import getToolByName
 
 import json
 import os
+import pkg_resources
 import unittest
 
 
@@ -22,6 +23,8 @@ class CreatorTestCase(unittest.TestCase):
 
     def setUp(self):
         self.portal = self.layer["portal"]
+        self.plone_version = pkg_resources.get_distribution("Products.CMFPlone").version
+        self.major_version = int(self.plone_version[0])
 
     def test_blocks_fields(self):
         content_structure = load_json("fields_blocks.json", __file__)
@@ -284,8 +287,18 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        self.assertEqual(blocks, json.loads(self.portal.blocks))
-        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+        self.assertEqual(
+            blocks,
+            self.portal.blocks
+            if self.major_version >= 6
+            else json.loads(self.portal.blocks),
+        )
+        self.assertEqual(
+            blocks_layout,
+            self.portal.blocks_layout
+            if self.major_version >= 6
+            else json.loads(self.portal.blocks_layout),
+        )
 
     def test_repeat_creation_twice(self):
         path = os.path.join(os.path.dirname(__file__), "content")
@@ -302,8 +315,18 @@ class CreatorTestCase(unittest.TestCase):
         with api.env.adopt_roles(["Manager"]):
             content_creator_from_folder(folder_name=path)
 
-        self.assertEqual(blocks, json.loads(self.portal.blocks))
-        self.assertEqual(blocks_layout, json.loads(self.portal.blocks_layout))
+        self.assertEqual(
+            blocks,
+            self.portal.blocks
+            if self.major_version >= 6
+            else json.loads(self.portal.blocks),
+        )
+        self.assertEqual(
+            blocks_layout,
+            self.portal.blocks_layout
+            if self.major_version >= 6
+            else json.loads(self.portal.blocks_layout),
+        )
 
         self.portal["a-folder"]["a-document-1"].title = "the modified title"
 
