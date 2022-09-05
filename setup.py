@@ -15,7 +15,7 @@ long_description = "\n\n".join(
 
 setup(
     name="kitconcept.contentcreator",
-    version="5.1.0",
+    version="5.1.1.dev0",
     description="Create Plone content via JSON",
     long_description=long_description,
     long_description_content_type="text/markdown",
