@@ -23,7 +23,7 @@ class CreatorTestCase(unittest.TestCase):
 
     def setUp(self):
         self.portal = self.layer["portal"]
-        self.plone_version = pkg_resources.get_distribution("Plone").version
+        self.plone_version = pkg_resources.get_distribution("Products.CMFPlone").version
         self.major_version = int(self.plone_version[0])
 
     def test_blocks_fields(self):
