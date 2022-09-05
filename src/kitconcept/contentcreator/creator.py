@@ -36,7 +36,6 @@ from zope.lifecycleevent import ObjectModifiedEvent
 import json
 import os
 import pathlib
-import pkg_resources
 
 
 DEFAULT_BLOCKS = {
