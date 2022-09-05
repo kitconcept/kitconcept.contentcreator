@@ -1,4 +1,5 @@
 from DateTime import DateTime
+from importlib import import_module
 from kitconcept import api
 from kitconcept.contentcreator.creator import content_creator_from_folder
 from kitconcept.contentcreator.creator import create_item_runner
@@ -13,18 +14,18 @@ from Products.CMFCore.utils import getToolByName
 
 import json
 import os
-import pkg_resources
 import unittest
 
 
 class CreatorTestCase(unittest.TestCase):
 
     layer = CONTENTCREATOR_CORE_INTEGRATION_TESTING
+    PLONE_6 = getattr(
+        import_module("Products.CMFPlone.factory"), "PLONE60MARKER", False
+    )
 
     def setUp(self):
         self.portal = self.layer["portal"]
-        self.plone_version = pkg_resources.get_distribution("Products.CMFPlone").version
-        self.major_version = int(self.plone_version[0])
 
     def test_blocks_fields(self):
         content_structure = load_json("fields_blocks.json", __file__)
@@ -289,14 +290,12 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(
             blocks,
-            self.portal.blocks
-            if self.major_version >= 6
-            else json.loads(self.portal.blocks),
+            self.portal.blocks if self.PLONE_6 else json.loads(self.portal.blocks),
         )
         self.assertEqual(
             blocks_layout,
             self.portal.blocks_layout
-            if self.major_version >= 6
+            if self.PLONE_6
             else json.loads(self.portal.blocks_layout),
         )
 
@@ -317,14 +316,12 @@ class CreatorTestCase(unittest.TestCase):
 
         self.assertEqual(
             blocks,
-            self.portal.blocks
-            if self.major_version >= 6
-            else json.loads(self.portal.blocks),
+            self.portal.blocks if self.PLONE_6 else json.loads(self.portal.blocks),
         )
         self.assertEqual(
             blocks_layout,
             self.portal.blocks_layout
-            if self.major_version >= 6
+            if self.PLONE_6
             else json.loads(self.portal.blocks_layout),
         )
 
