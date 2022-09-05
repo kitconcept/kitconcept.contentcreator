@@ -1,7 +1,7 @@
 Changelog
 =========
 
-5.0.6 (unreleased)
+5.1.0 (2022-09-05)
 ------------------
 
 - Change README, CHANGES, CONTRIBUTOR to markdown. @ericof
