@@ -9,6 +9,7 @@ Changelog
 - Use plone/code-analysis-action@v1 for Code Analysis @ericof
 
 - Directly change blocks and blocks_layout in the root for Plone6 and above @steffenri
+- Improve check for plone version @steffenri
 
 
 5.0.5 (2022-07-28)

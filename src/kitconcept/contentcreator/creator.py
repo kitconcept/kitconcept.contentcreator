@@ -7,6 +7,7 @@ from Acquisition import aq_base
 from Acquisition.interfaces import IAcquirer
 from dataclasses import dataclass
 from DateTime import DateTime
+from importlib import import_module
 from kitconcept import api
 from plone.app.content.interfaces import INameFromTitle
 from plone.app.dexterity import behaviors
@@ -35,7 +36,6 @@ from zope.lifecycleevent import ObjectModifiedEvent
 import json
 import os
 import pathlib
-import pkg_resources
 
 
 DEFAULT_BLOCKS = {
@@ -51,6 +51,8 @@ DEFAULT_BLOCKS_LAYOUT = {
 
 
 Pathlike = Union[str, pathlib.Path]
+
+PLONE_6 = getattr(import_module("Products.CMFPlone.factory"), "PLONE60MARKER", False)
 
 
 def load_json(path: Pathlike, base_path: Optional[Pathlike] = None):
@@ -682,10 +684,8 @@ def modify_siteroot(root_info):
     portal = api.portal.get()
     blocks = root_info["blocks"]
     blocks_layout = root_info["blocks_layout"]
-    plone_version = pkg_resources.get_distribution("Products.CMFPlone").version
-    major_version = int(plone_version[0])
 
-    if major_version >= 6:
+    if PLONE_6:
         portal.blocks = blocks
         portal.blocks_layout = blocks_layout
     else:
