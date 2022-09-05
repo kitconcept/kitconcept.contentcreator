@@ -682,7 +682,7 @@ def modify_siteroot(root_info):
     portal = api.portal.get()
     blocks = root_info["blocks"]
     blocks_layout = root_info["blocks_layout"]
-    plone_version = pkg_resources.get_distribution("Plone").version
+    plone_version = pkg_resources.get_distribution("Products.CMFPlone").version
     major_version = int(plone_version[0])
 
     if major_version >= 6:
